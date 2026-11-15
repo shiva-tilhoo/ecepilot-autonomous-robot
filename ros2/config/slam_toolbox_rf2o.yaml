@@ -1,0 +1,26 @@
+slam_toolbox:
+  ros__parameters:
+    solver_plugin: solver_plugins::CeresSolver
+    max_iterations: 40
+    huber_scale: 0.1 # Plus de souplesse sur les erreurs de calcul
+
+    # --- SÉCURITÉ TF ---
+    transform_timeout: 0.5 # On laisse plus de temps au système pour synchroniser
+    tf_buffer_duration: 10.0
+
+    # --- MODE SCAN MATCHING DOMINANT ---
+    use_scan_matching: true
+    # On met des pénalités TRÈS FAIBLES (0.01) pour que le SLAM ignore 
+    # presque l'odométrie et se recale sur les formes
+    angle_variance_penalty: 0.01    
+    distance_variance_penalty: 0.01 
+
+    # On cherche BEAUCOUP plus large pour ne jamais perdre le mur
+    coarse_search_angle_offset: 1.5
+    coarse_angle_resolution: 0.005
+    correlation_search_space_dimension: 4.0 
+
+    # --- FRÉQUENCE ---
+    minimum_time_interval: 0.1
+    minimum_travel_distance: 0.05
+    minimum_travel_heading: 0.05

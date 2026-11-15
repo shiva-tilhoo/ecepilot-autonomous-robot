@@ -1,0 +1,44 @@
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: false
+    
+    scan_queue_size: 1
+    throttle_scans: 1
+    
+    mode: mapping
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+    
+    transform_publish_period: 0.05
+    map_update_interval: 0.5
+    
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    
+    resolution: 0.025
+    max_laser_range: 5.0
+    min_laser_range: 0.1
+    
+    use_scan_matching: true
+    use_scan_barycenter: true
+    minimum_travel_distance: 0.1       # INCREASED from 0.001 = better map quality
+    minimum_travel_heading: 0.1        # INCREASED = reduces noise
+    
+    # Weight odometry less since it's not reliable (no encoders)
+    initial_pose_guess_error_in_rotation: 0.5      # Don't trust gyro much
+    initial_pose_guess_error_in_translation: 0.5   # Don't trust motor odom much
+    
+    # Trust scan matching more than odometry
+    coarse_angle_resolution: 0.04      # Wider search for good matches
+    coarse_search_angle_offset: 0.349  # +/- 20 degrees
+    
+    scan_buffer_size: 10
+    do_loop_closing: false
+    
+    publish_pose_graph: true
+    publish_tf: true
+    enable_interactive_mode: true

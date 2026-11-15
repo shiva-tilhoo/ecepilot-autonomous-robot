@@ -1,0 +1,29 @@
+# Wi-Fi credentials (copy secrets.example.h)
+secrets.h
+
+# PlatformIO
+.pio/
+.vscode/
+
+# ROS 2 / colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Files generated at run time
+ros2/trajectories/
+ros2/logs/
+ros2/slam_map_debug.png
+*.csv
+
+# KiCad
+*-backups/
+*.kicad_prl
+*.lck
+*-bak
+fp-info-cache
