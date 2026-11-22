@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LiDAR sector debug node: Affiche les valeurs front, gauche, droite à partir de /scan_raw.
+LiDAR sector debug node: prints the front, left and right values from /scan_raw.
 """
 
 import rclpy
@@ -11,7 +11,7 @@ import numpy as np
 class LidarSectorDebug(Node):
     def __init__(self):
         super().__init__('lidar_sector_debug')
-        self.lidar_offset_deg = -89.1  # Calibré selon test_lidar_front_alignment
+        self.lidar_offset_deg = -89.1  # Calibrated with test_lidar_front_alignment
         self.scan_sub = self.create_subscription(
             LaserScan, '/scan_raw', self.scan_callback, 10)
         self.get_logger().info('LidarSectorDebug ready.')
@@ -33,17 +33,17 @@ class LidarSectorDebug(Node):
             vals = vals[np.isfinite(vals)]
             return np.mean(vals) if len(vals) > 0 else np.nan
 
-        # Secteur gauche (0°)
+        # Left sector (0°)
         left_start = -10
         left_end = +10
         d_left = valid_mean(left_start, left_end)
 
-        # Secteur frontal (90°)
+        # Front sector (90°)
         front_start = 80
         front_end = 100
         d_front = valid_mean(front_start, front_end)
 
-        # Secteur droite (180°)
+        # Right sector (180°)
         right_start = 170
         right_end = 190
         d_right = valid_mean(right_start, right_end)

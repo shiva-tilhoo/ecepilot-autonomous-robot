@@ -1,32 +1,32 @@
 from PIL import Image
 import numpy as np
 
-# Charge l'image existante
+# Load the existing image
 img = Image.open('image2.png').convert('RGB')
 arr = np.array(img, dtype=np.uint8, copy=True)
 
-# Seuils pour noir/blanc
+# Black/white thresholds
 black_thresh = 60
 white_thresh = 200
 
-# Remplacement des pixels
+# Replace the pixels
 for y in range(arr.shape[0]):
 	for x in range(arr.shape[1]):
 		r, g, b = arr[y, x]
-		# Si proche de noir
+		# If close to black
 		if r < black_thresh and g < black_thresh and b < black_thresh:
 			arr[y, x] = [0, 0, 0]
-		# Si proche de blanc
+		# If close to white
 		elif r > white_thresh and g > white_thresh and b > white_thresh:
 			arr[y, x] = [255, 255, 255]
-		# Sinon, choix le plus proche
+		# Otherwise, pick the closest
 		else:
 			if (r+g+b)/3 < 128:
 				arr[y, x] = [0, 0, 0]
 			else:
 				arr[y, x] = [255, 255, 255]
 
-# Sauvegarde
+# Save
 img_out = Image.fromarray(arr)
 img_out.save('image.png')
-print('image.png convertie en noir/blanc pur.')
+print('image.png converted to pure black/white.')

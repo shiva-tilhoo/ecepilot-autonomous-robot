@@ -68,7 +68,7 @@ If the message persists:
 ### Case 3: Making the points bigger
 
 1. Left panel → **Displays**
-2. Click **LaserScan (Tous les 360 points)**
+2. Click **LaserScan 360**
 3. Find **Size (m)**: change it from **0.08** to **0.15** (or more)
 4. The points get bigger immediately
 
@@ -280,4 +280,4 @@ Now that RViz works:
 3. **Integrate with SLAM** for localisation
 4. **Build an occupancy map** for navigation
 
-See the "Next steps" section of **GUIDE_LIDAR_360_COMPLET.md**
+See the "Next steps" section of **LIDAR_360_GUIDE.md**

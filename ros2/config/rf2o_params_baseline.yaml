@@ -6,10 +6,10 @@ CLaserOdometry2DNode:
     odom_frame_id: odom
     init_pose_from_topic: ""
     
-    # ⏱️ Fréquence: alignée sur simulateur (~30 Hz)
+    # ⏱️ Rate: matched to the simulator (~30 Hz)
     freq: 30.0
     
-    # 📏 Portée LIDAR
+    # 📏 LIDAR range
     max_laser_range: 6.0
     min_range: 0.10
     
@@ -17,7 +17,7 @@ CLaserOdometry2DNode:
     max_iterations: 50
     tolerance: 1e-7
     
-    # 🎯 Filtre mouvement: standard (pas hyper-sensible)
+    # 🎯 Motion filter: standard (not hyper-sensitive)
     motion_filter_linear: 0.001
     motion_filter_angular: 0.001
     

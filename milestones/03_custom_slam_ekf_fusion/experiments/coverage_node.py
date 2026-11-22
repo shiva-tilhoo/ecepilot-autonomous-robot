@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 Adaptive Coverage Mapping Node for ROS2
-- Planifie des mouvements en spirale adaptative
-- Écoute /scan pour éviter les obstacles
-- Publie /cmd_vel pour commander les moteurs
-- Construit la map en temps réel
+- Plans adaptive spiral movements
+- Listens to /scan to avoid obstacles
+- Publishes /cmd_vel to drive the motors
+- Builds the map in real time
 """
 
 import rclpy
@@ -35,22 +35,22 @@ class CoverageNode(Node):
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
         self.map_sub = self.create_subscription(OccupancyGrid, '/map', self.map_callback, 10)
         
-        # Timer pour control loop
+        # Control loop timer
         self.timer = self.create_timer(0.1, self.control_loop)  # 10 Hz
         
         # ============ Coverage Parameters ============
-        self.spiral_radius = 0.5          # Rayon initial en mètres
-        self.spiral_max_radius = 5.0      # Rayon max
-        self.spiral_increment = 0.25      # Incrémentation rayon à chaque boucle
+        self.spiral_radius = 0.5          # Initial radius in metres
+        self.spiral_max_radius = 5.0      # Max radius
+        self.spiral_increment = 0.25      # Radius increment on each loop
         self.forward_speed = 0.3          # m/s
         self.angular_speed = 1.0          # rad/s
-        self.obstacle_distance = 0.3      # Distance minimale aux obstacles (m)
+        self.obstacle_distance = 0.3      # Minimum distance to obstacles (m)
         
         # ============ State Variables ============
         self.state = CoverageState.IDLE
         self.current_spiral_radius = self.spiral_radius
-        self.spiral_angle = 0.0           # 0 à 360 degrés
-        self.segments_completed = 0       # Nombre de segments (8 par boucle)
+        self.spiral_angle = 0.0           # 0 to 360 degrees
+        self.segments_completed = 0       # Number of segments (8 per loop)
         self.current_segment = 0
         self.coverage_complete = False
         self.start_time = self.get_clock().now()
@@ -68,30 +68,30 @@ class CoverageNode(Node):
         self.get_logger().info(f"  Forward speed: {self.forward_speed} m/s")
         self.get_logger().info(f"  Obstacle distance: {self.obstacle_distance} m")
         
-        # Auto-start après 1 seconde
+        # Auto-start after 1 second
         self.create_timer(1.0, self.start_coverage)
         self.started = False
     
     def start_coverage(self):
-        """Démarre automatiquement le mapping"""
+        """Starts the mapping automatically"""
         if not self.started:
             self.state = CoverageState.MOVING_FORWARD
             self.started = True
             self.get_logger().info("[COVERAGE] Starting spiral mapping coverage")
     
     def scan_callback(self, msg: LaserScan):
-        """Traite les données LIDAR"""
+        """Processes the LIDAR data"""
         self.last_scan = msg
         
-        # Détecter obstacles
+        # Detect obstacles
         self.detect_obstacles()
     
     def map_callback(self, msg: OccupancyGrid):
-        """Traite la carte occupancy grid"""
+        """Processes the occupancy grid map"""
         self.last_map = msg
     
     def detect_obstacles(self):
-        """Détecte les obstacles dans le scan LIDAR"""
+        """Detects the obstacles in the LIDAR scan"""
         if self.last_scan is None:
             return
         
@@ -99,22 +99,22 @@ class CoverageNode(Node):
         angles = np.arange(len(scan.ranges)) * scan.angle_increment + scan.angle_min
         ranges = np.array(scan.ranges)
         
-        # Nettoyer les infinités
+        # Clean up the infinities
         ranges[ranges == 0] = float('inf')
         ranges[ranges > scan.range_max] = float('inf')
         
-        # Chercher obstacles proches
+        # Look for close obstacles
         self.min_distance = np.min(ranges[ranges < float('inf')])
         
-        # Détection simple : si obstacle < seuil, on l'a vu
+        # Simple detection: obstacle < threshold means it was seen
         if self.min_distance < self.obstacle_distance:
             self.obstacle_detected = True
             
-            # Quelle direction ?
+            # Which direction?
             min_idx = np.argmin(ranges)
             angle = angles[min_idx]
             
-            # Catégoriser : devant (-30° à +30°), gauche, droite
+            # Classify: front (-30° to +30°), left, right
             if -np.pi/6 < angle < np.pi/6:
                 self.obstacle_direction = "FRONT"
             elif angle >= 0:
@@ -126,7 +126,7 @@ class CoverageNode(Node):
             self.obstacle_direction = None
     
     def control_loop(self):
-        """Boucle de contrôle principale (10 Hz)"""
+        """Main control loop (10 Hz)"""
         if not self.started:
             return
         
@@ -134,7 +134,7 @@ class CoverageNode(Node):
             self.stop_motors()
             return
         
-        # Machine à états
+        # State machine
         if self.state == CoverageState.MOVING_FORWARD:
             self.handle_moving_forward()
         
@@ -151,73 +151,73 @@ class CoverageNode(Node):
             self.stop_motors()
     
     def handle_moving_forward(self):
-        """Avancer en spirale"""
+        """Move forward along the spiral"""
         
-        # Obstacle devant ? Tourner
+        # Obstacle ahead? Turn
         if self.obstacle_detected and self.obstacle_direction == "FRONT":
             self.get_logger().warn(f"[COVERAGE] Obstacle detected at {self.min_distance:.2f}m, turning")
             self.state = CoverageState.TURNING_RIGHT
             return
         
-        # Incrementer spiral angle
-        angle_increment = 0.1  # rad par timestep (10Hz → ~0.5s par segment)
+        # Increment the spiral angle
+        angle_increment = 0.1  # rad per timestep (10Hz → ~0.5s per segment)
         self.spiral_angle += angle_increment
         
-        # Une boucle complète (2π rad) ?
+        # One full loop (2π rad)?
         if self.spiral_angle >= 2 * np.pi:
             self.spiral_angle = 0.0
             self.current_spiral_radius += self.spiral_increment
             self.get_logger().info(f"[COVERAGE] Spiral loop completed, radius now {self.current_spiral_radius:.2f}m")
             
-            # Spirale complète ?
+            # Spiral finished?
             if self.current_spiral_radius > self.spiral_max_radius:
                 self.get_logger().info("[COVERAGE] Coverage complete!")
                 self.coverage_complete = True
                 self.state = CoverageState.COMPLETED
                 return
         
-        # Commander avancer
+        # Command forward motion
         cmd = Twist()
         cmd.linear.x = self.forward_speed
         cmd.angular.z = 0.0
         self.cmd_vel_pub.publish(cmd)
     
     def handle_turning_left(self):
-        """Tourner à gauche"""
+        """Turn left"""
         cmd = Twist()
         cmd.linear.x = 0.0
-        cmd.angular.z = self.angular_speed  # Positif = CCW (left)
+        cmd.angular.z = self.angular_speed  # Positive = CCW (left)
         self.cmd_vel_pub.publish(cmd)
         
-        # Après 0.5s, reprendre avance
-        if self.spiral_angle % (2 * np.pi) > np.pi / 4:  # 45° parcourus
+        # After 0.5s, resume forward motion
+        if self.spiral_angle % (2 * np.pi) > np.pi / 4:  # 45° covered
             self.state = CoverageState.MOVING_FORWARD
     
     def handle_turning_right(self):
-        """Tourner à droite"""
+        """Turn right"""
         cmd = Twist()
         cmd.linear.x = 0.0
-        cmd.angular.z = -self.angular_speed  # Négatif = CW (right)
+        cmd.angular.z = -self.angular_speed  # Negative = CW (right)
         self.cmd_vel_pub.publish(cmd)
         
-        # Après 0.5s, reprendre avance
+        # After 0.5s, resume forward motion
         if self.spiral_angle % (2 * np.pi) < -np.pi / 4:
             self.state = CoverageState.MOVING_FORWARD
     
     def handle_adjusting(self):
-        """Ajuster trajectoire en fonction de la carte"""
-        # TODO: Implémenter ajustement intelligent basé sur /map
+        """Adjusts the trajectory based on the map"""
+        # TODO: implement a smarter adjustment based on /map
         self.state = CoverageState.MOVING_FORWARD
     
     def stop_motors(self):
-        """Arrêter tous les moteurs"""
+        """Stops every motor"""
         cmd = Twist()
         cmd.linear.x = 0.0
         cmd.angular.z = 0.0
         self.cmd_vel_pub.publish(cmd)
     
     def get_elapsed_time(self):
-        """Retour temps écoulé"""
+        """Returns the elapsed time"""
         now = self.get_clock().now()
         elapsed = (now - self.start_time).nanoseconds / 1e9
         return elapsed

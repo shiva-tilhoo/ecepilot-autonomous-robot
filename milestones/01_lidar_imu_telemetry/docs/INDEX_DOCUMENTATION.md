@@ -10,7 +10,7 @@
    - Quick start (3 steps)
    - Every resource link
 
-2. **[INSTALLATION_RAPIDE.md](INSTALLATION_RAPIDE.md)** 🚀 **5 MINUTES**
+2. **[QUICK_INSTALL.md](QUICK_INSTALL.md)** 🚀 **5 MINUTES**
    - Very fast setup
    - Automatic installation available
    - Starting the 3 terminals
@@ -23,7 +23,7 @@
 milestones/01_lidar_imu_telemetry/
 ├── docs/                                  ← This documentation
 │   ├── README.md                          ← READ FIRST
-│   ├── INSTALLATION_RAPIDE.md             ← 5-min setup
+│   ├── QUICK_INSTALL.md             ← 5-min setup
 │   ├── LIDAR_OPTIMIZATION.md              ← High-speed LIDAR firmware
 │   └── MPU6050_INTEGRATION.md             ← IMU integration
 │
@@ -43,8 +43,8 @@ milestones/01_lidar_imu_telemetry/
 **ROS2 documentation:**
 - [ros2_ece_ws/README.md](../ros2_ece_ws/README.md) - Complete ROS2 view
 - [ros2_ece_ws/QUICKSTART.md](../ros2_ece_ws/QUICKSTART.md) - ROS2 quick start
-- [ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md](../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md) - LIDAR specifications
-- [ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md](../ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md) - RViz setup
+- [ros2_ece_ws/LIDAR_360_GUIDE.md](../ros2_ece_ws/LIDAR_360_GUIDE.md) - LIDAR specifications
+- [ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md](../ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md) - RViz setup
 
 **C++ sources (colcon packages):**
 - `src/cpp_pubsub/` - LaserScan publish/subscribe
@@ -71,11 +71,11 @@ milestones/01_lidar_imu_telemetry/
 - `visualize_lidar.py` - More advanced visualisation
 
 **Detailed documentation:**
-- [00_SYNTHESE_FINALE.md](../ros2_ece_ws/00_SYNTHESE_FINALE.md) - Overall summary
+- [00_FINAL_SUMMARY.md](../ros2_ece_ws/00_FINAL_SUMMARY.md) - Overall summary
 - [MODIFICATIONS_SUMMARY.md](../ros2_ece_ws/MODIFICATIONS_SUMMARY.md) - History
-- [CHANGEMENTS_DETAILS.md](../ros2_ece_ws/CHANGEMENTS_DETAILS.md) - Detailed changes
-- [RESUME_MODIFICATIONS.md](../ros2_ece_ws/RESUME_MODIFICATIONS.md) - Summary
-- [INDEX_FICHIERS.md](../ros2_ece_ws/INDEX_FICHIERS.md) - ROS2 file index
+- [DETAILED_CHANGES.md](../ros2_ece_ws/DETAILED_CHANGES.md) - Detailed changes
+- [CHANGES_SUMMARY.md](../ros2_ece_ws/CHANGES_SUMMARY.md) - Summary
+- [FILE_INDEX.md](../ros2_ece_ws/FILE_INDEX.md) - ROS2 file index
 
 ---
 
@@ -109,20 +109,20 @@ milestones/01_lidar_imu_telemetry/
 
 ### 🚀 I just want to get started quickly
 
-1. [INSTALLATION_RAPIDE.md](INSTALLATION_RAPIDE.md) - 5 min
+1. [QUICK_INSTALL.md](QUICK_INSTALL.md) - 5 min
 2. Follow the 4 steps
 
 ### 📚 I want to understand the project as a whole
 
 1. [README.md](README.md) - Overview
-2. [00_SYNTHESE_FINALE.md](../ros2_ece_ws/00_SYNTHESE_FINALE.md) - Detailed summary
+2. [00_FINAL_SUMMARY.md](../ros2_ece_ws/00_FINAL_SUMMARY.md) - Detailed summary
 3. Look at the architecture in the README
 
 ### 🤖 I want to understand ROS2
 
 1. [ros2_ece_ws/README.md](../ros2_ece_ws/README.md) - ROS2 structure
 2. [ros2_ece_ws/QUICKSTART.md](../ros2_ece_ws/QUICKSTART.md) - Workflow
-3. [ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md](../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md) - Technical details
+3. [ros2_ece_ws/LIDAR_360_GUIDE.md](../ros2_ece_ws/LIDAR_360_GUIDE.md) - Technical details
 
 ### 💻 I want to understand the firmware
 
@@ -132,7 +132,7 @@ milestones/01_lidar_imu_telemetry/
 
 ### 📺 I want to configure RViz
 
-1. [ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md](../ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md) - RViz guide
+1. [ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md](../ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md) - RViz guide
 2. Use `lidar_config.rviz` - Ready-made config
 3. Run `./run_rviz.sh` - Launch script
 
@@ -174,17 +174,17 @@ milestones/01_lidar_imu_telemetry/
 | Topic | File |
 |-------|------|
 | Project overview | [README.md](README.md) |
-| Installation | [INSTALLATION_RAPIDE.md](INSTALLATION_RAPIDE.md) |
+| Installation | [QUICK_INSTALL.md](QUICK_INSTALL.md) |
 | ROS2 | [ros2_ece_ws/README.md](../ros2_ece_ws/README.md) |
 | Firmware | [firmware/README.md](../firmware/README.md) |
-| LIDAR | [ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md](../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md) |
-| RViz | [ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md](../ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md) |
+| LIDAR | [ros2_ece_ws/LIDAR_360_GUIDE.md](../ros2_ece_ws/LIDAR_360_GUIDE.md) |
+| RViz | [ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md](../ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md) |
 
 ### By Level
 
 | Level | Files | Time |
 |-------|-------|------|
-| Beginner | INSTALLATION_RAPIDE.md | 5 min |
+| Beginner | QUICK_INSTALL.md | 5 min |
 | Intermediate | README.md + specific guides | 30 min |
 | Advanced | Source code + specifications | - |
 

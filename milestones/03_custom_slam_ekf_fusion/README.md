@@ -40,7 +40,7 @@
   - The timestamp crisis (and its fix)
 
 ### Performance Analysis
-- **[PERFORMANCES.md](../../docs/PERFORMANCES.md)** - Before/after evolution
+- **[PERFORMANCE.md](../../docs/PERFORMANCE.md)** - Before/after evolution
   - Detailed metrics
   - Before/after comparison for each optimisation
   - Benchmark results
@@ -154,7 +154,7 @@ ros2 topic hz /map  # Should show 1 Hz
 ├── QUICKSTART.md                 # ← Start here
 ├── (../../docs/ARCHITECTURE.md)  # System design
 ├── (../../docs/SLAM_IMPLEMENTATION.md) # Algorithm details
-├── (../../docs/PERFORMANCES.md)  # Before/after analysis
+├── (../../docs/PERFORMANCE.md)  # Before/after analysis
 ├── README.md                     # This file
 │
 ├── src/
@@ -406,7 +406,7 @@ ps aux | grep python        # Check Python nodes
 - 📖 [QUICKSTART.md](QUICKSTART.md) - Getting started
 - 🏗️ [ARCHITECTURE.md](../../docs/ARCHITECTURE.md) - System design
 - 🎯 [SLAM_IMPLEMENTATION.md](../../docs/SLAM_IMPLEMENTATION.md) - Algorithm details
-- 📊 [PERFORMANCES.md](../../docs/PERFORMANCES.md) - Analysis
+- 📊 [PERFORMANCE.md](../../docs/PERFORMANCE.md) - Analysis
 
 ---
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 Motor Odometry Node - Init only
-Publie uniquement un TF statique odom -> base_link à l'origine.
-SLAM Toolbox fait tout le travail via scan matching.
-Pas de logique moteur, pas de cmd_vel, juste le TF initial.
+Only publishes a static odom -> base_link TF at the origin.
+SLAM Toolbox does all the work through scan matching.
+No motor logic, no cmd_vel, just the initial TF.
 """
 
 import rclpy
@@ -46,23 +46,23 @@ class MotorOdomNode(Node):
     def _publish(self):
         now = self.get_clock().now().to_msg()
 
-        # TF odom -> base_link : identité fixe
+        # TF odom -> base_link: fixed identity
         tf = TransformStamped()
         tf.header.stamp    = now
         tf.header.frame_id = self.odom_frame
         tf.child_frame_id  = self.robot_frame
-        tf.transform.rotation.w = 1.0  # quaternion identité
+        tf.transform.rotation.w = 1.0  # identity quaternion
         self.tf_broadcaster.sendTransform(tf)
 
-        # /odom message : identité, covariance très haute
-        # SLAM Toolbox lira ça comme "je ne sais rien, fais confiance au scan"
+        # /odom message: identity, very high covariance
+        # SLAM Toolbox reads this as "I know nothing, trust the scan"
         odom = Odometry()
         odom.header.stamp    = now
         odom.header.frame_id = self.odom_frame
         odom.child_frame_id  = self.robot_frame
         odom.pose.pose.orientation.w = 1.0
 
-        # Covariance énorme = SLAM ignore cet odom et se base uniquement sur le scan
+        # Huge covariance = SLAM ignores this odom and relies on the scan only
         BIG = 1e6
         odom.pose.covariance[0]  = BIG
         odom.pose.covariance[7]  = BIG

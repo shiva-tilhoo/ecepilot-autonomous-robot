@@ -6,21 +6,21 @@
 class TfBroadcaster : public rclcpp::Node {
 public:
     TfBroadcaster() : Node("lidar_tf_broadcaster") {
-        // Créer un static broadcaster pour la frame lidar_link
+        // Create a static broadcaster for the lidar_link frame
         tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
         
-        // Publier la transformation: odom -> lidar_link
+        // Publish the transform: odom -> lidar_link
         geometry_msgs::msg::TransformStamped transform;
         transform.header.stamp = this->get_clock()->now();
         transform.header.frame_id = "odom";
         transform.child_frame_id = "lidar_link";
         
-        // Position du LIDAR (0, 0, 0.2 mètres de hauteur)
+        // LIDAR position (0, 0, 0.2 metres high)
         transform.transform.translation.x = 0.0;
         transform.transform.translation.y = 0.0;
         transform.transform.translation.z = 0.2;
         
-        // Pas de rotation (orientation identité)
+        // No rotation (identity orientation)
         transform.transform.rotation.x = 0.0;
         transform.transform.rotation.y = 0.0;
         transform.transform.rotation.z = 0.0;
@@ -28,7 +28,7 @@ public:
         
         tf_broadcaster_->sendTransform(transform);
         
-        RCLCPP_INFO(this->get_logger(), "✅ TF broadcaster démarré: odom -> lidar_link");
+        RCLCPP_INFO(this->get_logger(), "✅ TF broadcaster started: odom -> lidar_link");
     }
 
 private:

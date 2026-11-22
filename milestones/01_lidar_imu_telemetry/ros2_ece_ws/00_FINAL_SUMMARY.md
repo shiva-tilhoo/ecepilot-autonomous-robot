@@ -115,27 +115,27 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/
 ├─ Quick RViz controls
 └─ Quick troubleshooting
 
-📋 RESUME_MODIFICATIONS.md           ← Technical overview
+📋 CHANGES_SUMMARY.md           ← Technical overview
 ├─ Modified files
 ├─ Before/after comparison
 ├─ Impact of the changes
 └─ Complete data flow
 
-📚 GUIDE_LIDAR_360_COMPLET.md       ← Complete reference
+📚 LIDAR_360_GUIDE.md       ← Complete reference
 ├─ Detailed procedure
 ├─ Step-by-step RViz configuration
 ├─ Topics and messages
 ├─ Advanced troubleshooting
 └─ Next steps
 
-🎨 GUIDE_RVIZ_CONFIGURATION.md      ← RViz only
+🎨 RVIZ_CONFIGURATION_GUIDE.md      ← RViz only
 ├─ Automatic configuration explained
 ├─ 6 manual adjustment cases
 ├─ Complete RViz controls
 ├─ RViz troubleshooting
 └─ Saving the configuration
 
-💻 CHANGEMENTS_DETAILS.md            ← Code analysis
+💻 DETAILED_CHANGES.md            ← Code analysis
 ├─ Before/after for each file
 ├─ Exact code changed
 ├─ Technical explanations
@@ -144,7 +144,7 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/
 🚀 deploy_lidar.sh                   ← Checks
 └─ Automatic tests (✓ all passed)
 
-📂 INDEX_FICHIERS.md                 ← File index
+📂 FILE_INDEX.md                 ← File index
 └─ Complete index and reading order
 ```
 
@@ -317,15 +317,15 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/
 **If it does not work:**
 1. Run: `milestones/01_lidar_imu_telemetry/ros2_ece_ws/deploy_lidar.sh`
 2. Check the outputs (buffer, RViz, etc.)
-3. See the "Troubleshooting" section of `GUIDE_LIDAR_360_COMPLET.md`
+3. See the "Troubleshooting" section of `LIDAR_360_GUIDE.md`
 
 **To adjust RViz:**
-1. See `GUIDE_RVIZ_CONFIGURATION.md`
+1. See `RVIZ_CONFIGURATION_GUIDE.md`
 2. Follow the use cases (colour, size, etc.)
 3. Save the config once satisfied
 
 **To understand the code:**
-1. See `CHANGEMENTS_DETAILS.md`
+1. See `DETAILED_CHANGES.md`
 2. Read the commented before/after
 3. Explore the modified files
 

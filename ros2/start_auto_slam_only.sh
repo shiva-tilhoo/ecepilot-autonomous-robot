@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test robot autonome en mode SLAM-only (sans RF2O)
+# Autonomous robot test in SLAM-only mode (without RF2O)
 
 set -e
 
@@ -26,8 +26,8 @@ if [ -n "$WORKSPACE_SETUP" ]; then
 fi
 
 if ! ros2 pkg prefix slam_toolbox >/dev/null 2>&1; then
-  echo "❌ Package slam_toolbox introuvable dans l'environnement courant"
-  echo "Vérifie le source de ROS2 et de ton workspace"
+  echo "❌ slam_toolbox package not found in the current environment"
+  echo "Check that ROS2 and your workspace are sourced"
   exit 1
 fi
 
@@ -46,14 +46,14 @@ sleep 2
 
 echo ""
 echo "==========================================="
-echo "🤖 ROBOT AUTONOME + SLAM (SANS RF2O)"
+echo "🤖 AUTONOMOUS ROBOT + SLAM (WITHOUT RF2O)"
 echo "==========================================="
 echo ""
-echo "Appuyez sur 'A' dans la fenêtre pygame"
-echo "pour activer le mode AUTONOME!"
+echo "Press 'A' in the pygame window"
+echo "to enable AUTONOMOUS mode!"
 echo ""
 
-echo "1️⃣  Simulator (avec mode autonome)..."
+echo "1️⃣  Simulator (with autonomous mode)..."
 python3 simu_lidar_auto.py &
 sleep 1
 
@@ -92,11 +92,11 @@ echo "==========================================="
 echo "✅ READY (SLAM-only)"
 echo "==========================================="
 echo ""
-echo "🎮 CONTRÔLES:"
-echo "   A          = Toggle mode AUTONOME"
-echo "   Flèches    = Contrôle manuel"
+echo "🎮 CONTROLS:"
+echo "   A          = Toggle AUTONOMOUS mode"
+echo "   Arrows     = Manual control"
 echo ""
-echo "📊 Observer: python3 compare_rf2o_vs_slam.py"
+echo "📊 Monitor: python3 compare_rf2o_vs_slam.py"
 echo "🛑 Stop:     pkill -9 -f 'simu_|rf2o|slam|restamper|transform'"
 echo ""
 

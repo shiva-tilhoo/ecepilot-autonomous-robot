@@ -5,7 +5,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."  # root of the ROS 2 stack (ros2/)
 set -e  # Exit on any error
 
 echo "=========================================="
-echo "LANCEMENT SIMPLE ET ROBUSTE DU STACK"
+echo "SIMPLE AND ROBUST STACK START-UP"
 echo "=========================================="
 
 # Kill all previous instances

@@ -6,7 +6,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."  # root of the ROS 2 stack (ros2/)
 # Tested and working configuration!
 
 echo "=========================================="
-echo "🚀 Lancement FINAL du Stack RF2O"
+echo "🚀 FINAL start-up of the RF2O stack"
 echo "=========================================="
 
 # Cleanup

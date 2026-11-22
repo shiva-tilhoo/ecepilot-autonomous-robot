@@ -2,7 +2,7 @@
 """Test LiDAR front alignment.
 
 Usage:
-1) Place a flat obstacle (carton/mur) at ~25-40 cm in front of the robot body.
+1) Place a flat obstacle (cardboard/wall) at ~25-40 cm in front of the robot body.
 2) Keep robot static.
 3) Run this script and wait 5-10 seconds.
 4) Send me the printed "recommended_offset_deg" value.

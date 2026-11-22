@@ -43,76 +43,76 @@ fi
 print_header "ECE ROS2 + microROS Setup"
 
 # Update system
-print_info "Mise à jour du système..."
+print_info "Updating the system..."
 sudo apt update
 sudo apt upgrade -y
 
 # Install ROS2 Humble
-print_header "Installation ROS2 Humble"
+print_header "Installing ROS2 Humble"
 
 if [ ! -d "/opt/ros/humble" ]; then
-    print_info "Ajout du repository ROS2..."
+    print_info "Adding the ROS2 repository..."
     sudo apt install software-properties-common -y
     sudo add-apt-repository universe -y
     curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
     
     sudo apt update
-    print_info "Installation de ROS2 Humble (cela peut prendre quelques minutes)..."
+    print_info "Installing ROS2 Humble (this can take a few minutes)..."
     sudo apt install ros-humble-desktop -y
-    print_success "ROS2 Humble installé"
+    print_success "ROS2 Humble installed"
 else
-    print_success "ROS2 Humble déjà installé"
+    print_success "ROS2 Humble already installed"
 fi
 
 # Install colcon
 print_header "Installation Colcon"
-print_info "Installation de colcon..."
+print_info "Installing colcon..."
 sudo apt install python3-colcon-common-extensions -y
-print_success "Colcon installé"
+print_success "Colcon installed"
 
 # Install RViz2
 print_header "Installation RViz2"
 sudo apt install ros-humble-rviz2 -y
-print_success "RViz2 installé"
+print_success "RViz2 installed"
 
 # Install PlatformIO
 print_header "Installation PlatformIO"
 if ! command -v platformio &> /dev/null; then
-    print_info "Installation de PlatformIO..."
+    print_info "Installing PlatformIO..."
     pip install platformio
-    print_success "PlatformIO installé"
+    print_success "PlatformIO installed"
 else
-    print_success "PlatformIO déjà installé"
+    print_success "PlatformIO already installed"
 fi
 
 # Install Docker
 print_header "Installation Docker"
 if ! command -v docker &> /dev/null; then
-    print_info "Installation de Docker..."
+    print_info "Installing Docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     sudo sh get-docker.sh
     sudo usermod -aG docker $USER
-    print_success "Docker installé"
-    print_info "⚠️  Déconnectez-vous et reconnectez-vous pour que les permissions docker prennent effet"
+    print_success "Docker installed"
+    print_info "⚠️  Log out and back in for the docker permissions to take effect"
 else
-    print_success "Docker déjà installé"
+    print_success "Docker already installed"
 fi
 
 # Pull microROS Docker image
 print_header "Image Docker microROS"
-print_info "Téléchargement de l'image microROS..."
+print_info "Downloading the microROS image..."
 docker pull microros/micro-ros-docker:humble
-print_success "Image microROS téléchargée"
+print_success "microROS image downloaded"
 
 # Install Python dependencies
-print_header "Dépendances Python"
-print_info "Installation des dépendances Python..."
+print_header "Python dependencies"
+print_info "Installing the Python dependencies..."
 pip install numpy matplotlib pygame
-print_success "Dépendances Python installées"
+print_success "Python dependencies installed"
 
 # Create sourcing script
-print_header "Script de Configuration"
+print_header "Configuration script"
 cat > ~/.bashrc_ros2_ece << EOF
 # ECE ROS2 + microROS Setup
 
@@ -142,42 +142,42 @@ if ! grep -q "ros2_ece" ~/.bashrc; then
     echo "fi" >> ~/.bashrc
 fi
 
-print_success "Script de configuration créé"
+print_success "Configuration script created"
 
 # Build workspace
-print_header "Compilation du Workspace ROS2"
-print_info "Cela peut prendre 5-10 minutes..."
+print_header "Building the ROS2 workspace"
+print_info "This can take 5-10 minutes..."
 cd "$HERE/ros2_ece_ws"
 source /opt/ros/humble/setup.bash
 colcon build --event-handlers console_direct+
-print_success "Workspace compilé"
+print_success "Workspace built"
 
 # Summary
-print_header "Installation Complétée! ✓"
+print_header "Installation complete! ✓"
 echo ""
-echo "Vérifiez votre installation:"
+echo "Check your installation:"
 echo ""
-print_info "Source la configuration ROS2:"
+print_info "Source the ROS2 configuration:"
 echo "  source ~/.bashrc_ros2_ece"
 echo ""
-print_info "Ou utiliser les aliases créés:"
-echo "  build_ros2    - Compiler le workspace ROS2"
-echo "  run_lidar     - Lancer le listener LIDAR"
-echo "  run_rviz      - Lancer RViz"
-echo "  run_agent     - Lancer l'agent microROS"
-echo "  build_pio     - Compiler le firmware PlatformIO"
-echo "  upload_pio    - Uploader vers l'ESP32"
+print_info "Or use the aliases that were created:"
+echo "  build_ros2    - Build the ROS2 workspace"
+echo "  run_lidar     - Start the LIDAR listener"
+echo "  run_rviz      - Start RViz"
+echo "  run_agent     - Start the microROS agent"
+echo "  build_pio     - Build the PlatformIO firmware"
+echo "  upload_pio    - Flash the ESP32"
 echo ""
-print_info "Commandes de test:"
+print_info "Test commands:"
 echo "  ros2 --version"
 echo "  platformio --version"
 echo "  docker --version"
 echo ""
-print_info "Prochaines étapes:"
-echo "  1. Déconnectez-vous et reconnectez-vous (pour les permissions Docker)"
-echo "  2. Ouvrez un nouveau terminal"
-echo "  3. Lancez: source ~/.bashrc_ros2_ece"
-echo "  4. Suivez le QUICKSTART.md pour démarrer le projet"
+print_info "Next steps:"
+echo "  1. Log out and back in (for the Docker permissions)"
+echo "  2. Open a new terminal"
+echo "  3. Run: source ~/.bashrc_ros2_ece"
+echo "  4. Follow QUICKSTART.md to start the project"
 echo ""
 
-print_success "Installation prête! Bon développement! 🚀"
+print_success "Installation ready! Happy hacking! 🚀"

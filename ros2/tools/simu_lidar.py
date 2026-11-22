@@ -4,8 +4,8 @@ import pygame, math, socket, pickle, struct, os
 # --- CONFIG ---
 WIDTH, HEIGHT = 800, 600
 MAP_RES       = 0.0133
-NUM_RAYS      = 180  # 180 rayons suffisent largement et boostent les FPS
-CIRCUIT_PATH  = "image_corridor_grossi.png"
+NUM_RAYS      = 180  # 180 rays are plenty and boost the FPS
+CIRCUIT_PATH  = "image_corridor_widened.png"
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -33,7 +33,7 @@ def get_lidar_ranges(pos, theta):
         angle = (2.0 * math.pi * i / NUM_RAYS) + theta
         cos_a, sin_a = math.cos(angle), math.sin(angle)
         dist = 6.0
-        # Pas de 2 pixels pour une détection fine des murs
+        # 2-pixel step for fine wall detection
         for r in range(5, int(6.0/MAP_RES), 2):
             tx, ty = int(pos[0] + r*cos_a), int(pos[1] + r*sin_a)
             if not (0 <= tx < WIDTH and 0 <= ty < HEIGHT) or circuit_surf.get_at((tx, ty))[0] < 80:
@@ -43,7 +43,7 @@ def get_lidar_ranges(pos, theta):
     return ranges
 
 def normalize_angle(angle):
-    """Normalise un angle en [-pi, pi]"""
+    """Normalises an angle to [-pi, pi]"""
     while angle > math.pi:
         angle -= 2 * math.pi
     while angle < -math.pi:
@@ -51,7 +51,7 @@ def normalize_angle(angle):
     return angle
 
 def angle_to_quaternion(angle):
-    """Convertit un angle 2D en quaternion ROS"""
+    """Converts a 2D angle to a ROS quaternion"""
     half_angle = angle / 2.0
     return {
         'z': math.sin(half_angle),
@@ -76,7 +76,7 @@ while run:
 
     screen.blit(circuit_surf, (0,0))
     pygame.draw.circle(screen, (0,0,255), (int(robot_pos[0]), int(robot_pos[1])), 10)
-    # Trait rouge indiquant le devant du robot
+    # Red line showing the front of the robot
     front_x = int(robot_pos[0] + 15 * math.cos(robot_th))
     front_y = int(robot_pos[1] + 15 * math.sin(robot_th))
     pygame.draw.line(screen, (255,0,0), (int(robot_pos[0]), int(robot_pos[1])), (front_x, front_y), 3)
@@ -85,7 +85,7 @@ while run:
     if lidar_conn:
         try:
             q = angle_to_quaternion(robot_th)
-            # Convertir les positions de pixels en mètres
+            # Convert the pixel positions to metres
             data = {
                 'ranges': get_lidar_ranges(robot_pos, robot_th),
                 'pose': {

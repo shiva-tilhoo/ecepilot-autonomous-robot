@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-TRAJECTORY SAVER - Enregistre et gère la trajectoire réelle du robot
+TRAJECTORY SAVER - Records and manages the actual trajectory of the robot
 
-Reçoit les points de trajectoire du loop_closure_detector et les sauvegarde
-avec options d'optimisation et de conversion.
+Receives the trajectory points from loop_closure_detector and saves them
+with optimisation and conversion options.
 """
 
 import json
@@ -39,14 +39,14 @@ class TrajectorySaver(Node):
             10
         )
         
-        # Créer dossier trajectories
+        # Create the trajectories folder
         self.traj_dir = Path.home() / "trajectories" / "auto_mapping"
         self.traj_dir.mkdir(parents=True, exist_ok=True)
         
-        self.get_logger().info("💾 Trajectory Saver démarré")
+        self.get_logger().info("💾 Trajectory Saver started")
     
     def trajectory_point_callback(self, msg):
-        """Reçoit et enregistre un point de trajectoire"""
+        """Receives and records a trajectory point"""
         if not self.mapping_completed:
             point = [
                 msg.pose.position.x,
@@ -55,26 +55,26 @@ class TrajectorySaver(Node):
             ]
             self.trajectory_points.append(point)
             
-            if len(self.trajectory_points) % 10 == 0:  # Log tous les 10 points
-                self.get_logger().debug(f"📍 Point {len(self.trajectory_points)} enregistré")
+            if len(self.trajectory_points) % 10 == 0:  # Log every 10 points
+                self.get_logger().debug(f"📍 Point {len(self.trajectory_points)} recorded")
     
     def return_detected_callback(self, msg):
-        """Appelé quand le retour au départ est détecté"""
+        """Called when the return to the start is detected"""
         if msg.data and not self.mapping_completed:
             self.is_recording = True
-            self.get_logger().info(f"✅ Return détecté - {len(self.trajectory_points)} points enregistrés")
+            self.get_logger().info(f"✅ Return detected - {len(self.trajectory_points)} points recorded")
     
     def save_all_formats(self, prefix=""):
-        """Sauvegarde la trajectoire dans tous les formats utiles"""
+        """Saves the trajectory in every useful format"""
         if not self.trajectory_points:
-            self.get_logger().warn("⚠️ Aucun point à sauvegarder")
+            self.get_logger().warn("⚠️ No point to save")
             return
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"trajectory_{timestamp}_{prefix}" if prefix else f"trajectory_{timestamp}"
         
         try:
-            # 1. Format JSON (lisible, portable)
+            # 1. JSON format (readable, portable)
             json_file = self.traj_dir / f"{filename}.json"
             json_data = {
                 "timestamp": timestamp,
@@ -86,14 +86,14 @@ class TrajectorySaver(Node):
             }
             with open(json_file, 'w') as f:
                 json.dump(json_data, f, indent=2)
-            self.get_logger().info(f"✅ Sauvegarde JSON: {json_file}")
+            self.get_logger().info(f"✅ JSON saved: {json_file}")
             
-            # 2. Format NumPy (accès rapide, calculs)
+            # 2. NumPy format (fast access, computations)
             npy_file = self.traj_dir / f"{filename}.npy"
             np.save(npy_file, np.array(self.trajectory_points))
-            self.get_logger().info(f"✅ Sauvegarde NumPy: {npy_file}")
+            self.get_logger().info(f"✅ NumPy saved: {npy_file}")
             
-            # 3. Format CSV (compatibilité outils externes)
+            # 3. CSV format (compatible with external tools)
             csv_file = self.traj_dir / f"{filename}.csv"
             np.savetxt(
                 csv_file,
@@ -102,9 +102,9 @@ class TrajectorySaver(Node):
                 header='x_m,y_m,z_m',
                 comments=''
             )
-            self.get_logger().info(f"✅ Sauvegarde CSV: {csv_file}")
+            self.get_logger().info(f"✅ CSV saved: {csv_file}")
             
-            # 4. Statistiques
+            # 4. Statistics
             arr = np.array(self.trajectory_points)
             stats = {
                 "num_points": len(self.trajectory_points),
@@ -116,16 +116,16 @@ class TrajectorySaver(Node):
             stats_file = self.traj_dir / f"{filename}_stats.json"
             with open(stats_file, 'w') as f:
                 json.dump(stats, f, indent=2)
-            self.get_logger().info(f"📊 Statistiques: {stats_file}")
+            self.get_logger().info(f"📊 Statistics: {stats_file}")
             
             self.mapping_completed = True
             
         except Exception as e:
-            self.get_logger().error(f"❌ Erreur sauvegarde: {e}")
+            self.get_logger().error(f"❌ Save error: {e}")
     
     @staticmethod
     def _calculate_path_length(points):
-        """Calcule la longueur totale du chemin"""
+        """Computes the total length of the path"""
         if len(points) < 2:
             return 0.0
         
@@ -135,7 +135,7 @@ class TrajectorySaver(Node):
     
     def optimize_trajectory(self, max_distance_between_samples=0.15):
         """
-        Optimise le chemin en supprimant points redondants/bruyants
+        Optimises the path by removing redundant/noisy points
         """
         if len(self.trajectory_points) < 3:
             return self.trajectory_points
@@ -149,7 +149,7 @@ class TrajectorySaver(Node):
                 optimized.append(arr[i].tolist())
         
         self.get_logger().info(
-            f"🔧 Trajectoire optimisée: {len(self.trajectory_points)} → {len(optimized)} points"
+            f"🔧 Optimised trajectory: {len(self.trajectory_points)} → {len(optimized)} points"
         )
         return optimized
 
@@ -160,7 +160,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        # Sauvegarder avant de quitter
+        # Save before quitting
         node.save_all_formats("final")
     finally:
         node.destroy_node()

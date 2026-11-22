@@ -13,26 +13,26 @@ class SimuBridge(Node):
         self.tf_br = TransformBroadcaster(self)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
-        # Variables pour garder en mémoire la dernière position connue
+        # Variables that keep the last known position
         self.last_pose = [0.0, 0.0, 0.0]
         self.last_ranges = [0.0] * 180 
         
         try:
             self.sock.connect(('127.0.0.1', 5005))
             self.sock.setblocking(False)
-            self.get_logger().info('✅ Bridge Connecté à 50Hz')
+            self.get_logger().info('✅ Bridge connected at 50Hz')
         except Exception as e:
-            self.get_logger().error(f'Erreur : {e}')
+            self.get_logger().error(f'Error: {e}')
         
         self.create_timer(0.02, self.loop) # 50Hz constant
         self.map_res = 0.0133
 
     def loop(self):
         data = None
-        # On essaie de lire le dernier paquet disponible
+        # Try to read the latest available packet
         try:
             while True:
-                part = self.sock.recv(65536) # Buffer plus gros pour pickle
+                part = self.sock.recv(65536) # Larger buffer for pickle
                 if not part: break
                 data = part
         except (BlockingIOError, socket.error):
@@ -46,8 +46,8 @@ class SimuBridge(Node):
             except:
                 pass
 
-        # ON PUBLIE TOUJOURS, même si data est vide (on utilise la dernière pose)
-        # C'est ce qui empêche le "Failed to compute odom pose"
+        # ALWAYS PUBLISH, even if data is empty (the last pose is reused)
+        # This is what prevents the "Failed to compute odom pose" error
         stamp = self.get_clock().now().to_msg()
         px, py, pth = self.last_pose
         x, y, th = px * self.map_res, -py * self.map_res, -pth
@@ -59,7 +59,7 @@ class SimuBridge(Node):
         t.child_frame_id = 'base_link'
         t.transform.translation.x = float(x)
         t.transform.translation.y = float(y)
-        # Correction Quaternion (Normalisation)
+        # Quaternion correction (normalisation)
         t.transform.rotation.z = math.sin(th / 2.0)
         t.transform.rotation.w = math.cos(th / 2.0)
         self.tf_br.sendTransform(t)

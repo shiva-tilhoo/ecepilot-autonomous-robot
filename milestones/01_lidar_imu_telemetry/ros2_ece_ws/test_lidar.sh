@@ -2,7 +2,7 @@
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # directory of this script
 
 # ============================================================
-# Script de test rapide - ROS2 LIDAR PubSub
+# Quick test script - ROS2 LIDAR PubSub
 # ============================================================
 
 set -e
@@ -24,7 +24,7 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${YELLOW}📦 Sourcing ROS2 environment...${NC}"
 source "$WORKSPACE/install/setup.bash"
 
-# Vérification directories
+# Check the directories
 if [ ! -d "$WORKSPACE" ]; then
     echo -e "${RED}✗ Workspace not found: $WORKSPACE${NC}"
     exit 1
@@ -32,93 +32,93 @@ fi
 
 echo -e "${GREEN}✓ Workspace found${NC}\n"
 
-# Fonction: Test Publishers
+# Function: test the publishers
 test_publisher() {
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}Test 1: PUBLISHER (talker)${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}\n"
     
-    echo "Lançage du publisher dans 5 secondes..."
-    echo "Arrêtez avec: Ctrl+C\n"
+    echo "Starting the publisher for 5 seconds..."
+    echo "Stop with: Ctrl+C\n"
     
     sleep 2
     
     timeout 5 ros2 run $PACKAGE talker || true
     
-    echo -e "\n${GREEN}✓ Publisher test terminé${NC}\n"
+    echo -e "\n${GREEN}✓ Publisher test finished${NC}\n"
 }
 
-# Fonction: Test Subscribers
+# Function: test the subscribers
 test_subscriber() {
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}Test 2: SUBSCRIBER (listener)${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}\n"
     
-    echo "Note: Lancez le publisher dans un autre terminal d'abord!"
-    echo "Puis lancez ce test.\n"
+    echo "Note: start the publisher in another terminal first!"
+    echo "Then run this test.\n"
     
     timeout 10 ros2 run $PACKAGE listener || true
     
-    echo -e "\n${GREEN}✓ Subscriber test terminé${NC}\n"
+    echo -e "\n${GREEN}✓ Subscriber test finished${NC}\n"
 }
 
-# Fonction: Test Topics
+# Function: test the topics
 test_topics() {
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}Test 3: ROS2 TOPICS${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}\n"
     
-    echo -e "${YELLOW}Topics disponibles:${NC}"
+    echo -e "${YELLOW}Available topics:${NC}"
     ros2 topic list || true
     
     echo ""
-    echo -e "${YELLOW}Info sur /scan:${NC}"
+    echo -e "${YELLOW}Info on /scan:${NC}"
     ros2 topic info /scan || true
     
     echo ""
-    echo -e "${YELLOW}Info sur /data:${NC}"
+    echo -e "${YELLOW}Info on /data:${NC}"
     ros2 topic info /data || true
     
-    echo -e "\n${GREEN}✓ Topics test terminé${NC}\n"
+    echo -e "\n${GREEN}✓ Topics test finished${NC}\n"
 }
 
-# Fonction: Test Launch
+# Function: test the launch file
 test_launch() {
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}Test 4: LAUNCH FILE${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}\n"
     
-    echo "Lançage du launch file pour 10 secondes..."
-    echo "Arrêtez avec: Ctrl+C\n"
+    echo "Starting the launch file for 10 seconds..."
+    echo "Stop with: Ctrl+C\n"
     
     sleep 2
     
     timeout 10 ros2 launch $PACKAGE lidar_launch.py || true
     
-    echo -e "\n${GREEN}✓ Launch file test terminé${NC}\n"
+    echo -e "\n${GREEN}✓ Launch file test finished${NC}\n"
 }
 
-# Fonction: Full System Test
+# Function: full system test
 test_full_system() {
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}Test 5: FULL SYSTEM (Publisher + Subscriber)${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════${NC}\n"
     
-    echo -e "${YELLOW}Lançage du système complet...${NC}\n"
+    echo -e "${YELLOW}Starting the full system...${NC}\n"
     
-    # Lancer publisher en arrière-plan
+    # Start the publisher in the background
     ros2 run $PACKAGE talker &
     PUB_PID=$!
     
     sleep 2
     
-    # Lancer subscriber (5 secondes)
+    # Start the subscriber (5 seconds)
     timeout 5 ros2 run $PACKAGE listener || true
     
-    # Tuer publisher
+    # Kill the publisher
     kill $PUB_PID 2>/dev/null || true
     
-    echo -e "\n${GREEN}✓ Full system test terminé${NC}\n"
+    echo -e "\n${GREEN}✓ Full system test finished${NC}\n"
 }
 
 # Menu
@@ -139,9 +139,9 @@ case $1 in
         test_full_system
         ;;
     all)
-        echo -e "${YELLOW}Exécution de tous les tests...${NC}\n"
+        echo -e "${YELLOW}Running every test...${NC}\n"
         test_publisher
-        echo "Appuyez sur Entrée pour continuer..."
+        echo "Press Enter to continue..."
         read
         test_topics
         test_launch
@@ -150,15 +150,15 @@ case $1 in
         cat << EOF
 ${BLUE}Usage: $0 [TEST]${NC}
 
-Tests disponibles:
-  ${GREEN}1, publisher${NC}    Tester le Publisher
-  ${GREEN}2, subscriber${NC}   Tester le Subscriber
-  ${GREEN}3, topics${NC}       Tester les Topics ROS2
-  ${GREEN}4, launch${NC}       Tester le Launch File
-  ${GREEN}5, full${NC}        Tester le système complet
-  ${GREEN}all${NC}            Exécuter tous les tests
+Available tests:
+  ${GREEN}1, publisher${NC}    Test the Publisher
+  ${GREEN}2, subscriber${NC}   Test the Subscriber
+  ${GREEN}3, topics${NC}       Test the ROS2 topics
+  ${GREEN}4, launch${NC}       Test the launch file
+  ${GREEN}5, full${NC}        Test the full system
+  ${GREEN}all${NC}            Run every test
 
-Exemples:
+Examples:
   $0 publisher
   $0 launch
   $0 all
@@ -169,5 +169,5 @@ EOF
 esac
 
 echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}✅ Tests terminés avec succès!${NC}"
+echo -e "${GREEN}✅ Tests finished successfully!${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════${NC}"

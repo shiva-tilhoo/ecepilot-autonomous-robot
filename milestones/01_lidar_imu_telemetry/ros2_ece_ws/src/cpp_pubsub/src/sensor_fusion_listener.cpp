@@ -19,7 +19,7 @@ public:
             "/scan", 10,
             std::bind(&SensorFusionListener::scan_callback, this, std::placeholders::_1));
 
-        RCLCPP_INFO(this->get_logger(), "Sensor Fusion Listener démarré!");
+        RCLCPP_INFO(this->get_logger(), "Sensor Fusion Listener started!");
         RCLCPP_INFO(this->get_logger(), "Topics: /imu/data, /scan");
     }
 
@@ -27,7 +27,7 @@ private:
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr msg) const
     {
         static int count = 0;
-        if (count++ % 5 == 0)  // Afficher toutes les 5 fois (4Hz au lieu de 20Hz)
+        if (count++ % 5 == 0)  // Print every 5th message (4Hz instead of 20Hz)
         {
             RCLCPP_INFO(this->get_logger(),
                 "\n=== IMU DATA ===\n"
@@ -46,7 +46,7 @@ private:
 
     void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) const
     {
-        // Calculer stats du scan
+        // Compute the scan statistics
         float min_range = 10.0, max_range = 0.0, avg_range = 0.0;
         int valid_points = 0;
 
@@ -67,7 +67,7 @@ private:
             avg_range /= valid_points;
             RCLCPP_INFO(this->get_logger(),
                 "\n=== LIDAR SCAN ===\n"
-                "Points: %zu | Valides: %d\n"
+                "Points: %zu | Valid: %d\n"
                 "Range: Min=%.2f m, Max=%.2f m, Avg=%.2f m\n"
                 "Angle: [%.2f, %.2f] rad, Increment=%.4f rad",
                 msg->ranges.size(), valid_points,

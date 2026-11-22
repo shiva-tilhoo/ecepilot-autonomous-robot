@@ -60,16 +60,16 @@ After:  [Buffer] ← [12 points/frame] → [All 720 points] → RViz
 
 **Result:**
 ```
-✅ Listener démarré - RViz se lancera dans 5 secondes
+✅ Listener started - RViz will start in 5 seconds
 
-📋 CONFIGURATION REQUISE:
-   Lancez l'agent micro_ros dans un AUTRE terminal:
+📋 REQUIRED SETUP:
+   Start the micro_ros agent in ANOTHER terminal:
    docker run -it --rm microros/micro-ros-docker:humble \
      ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
    
-📡 TOPICS REÇUS DE L'ESP32:
-   • /scan (sensor_msgs/LaserScan) - 360 points LIDAR
-   • /data (std_msgs/Int32) - Compteur
+📡 TOPICS RECEIVED FROM THE ESP32:
+   • /scan (sensor_msgs/LaserScan) - 360 LIDAR points
+   • /data (std_msgs/Int32) - Counter
 ```
 
 ---
@@ -78,7 +78,7 @@ After:  [Buffer] ← [12 points/frame] → [All 720 points] → RViz
 **File:** `milestones/01_lidar_imu_telemetry/ros2_ece_ws/src/cpp_pubsub/launch/lidar.rviz`
 
 **Changes:**
-- ✏️ Name: "LaserScan (Tous les 360 points)"
+- ✏️ Name: "LaserScan 360"
 - ✏️ Colour: **red** (Flat Color)
 - ✏️ Style: **Spheres** (more visible than Flat Squares)
 - ✏️ Size: **8cm** (0.08m) for better visibility
@@ -201,7 +201,7 @@ From VS Code: open the project and click "Upload"
 
 ## 📚 Full Documentation
 
-See the detailed file: **GUIDE_LIDAR_360_COMPLET.md**
+See the detailed file: **LIDAR_360_GUIDE.md**
 
 It contains:
 - ✅ Step-by-step RViz configuration

@@ -11,33 +11,33 @@ public:
   MinimalSubscriber()
   : Node("lidar_subscriber"), scan_count_(0), counter_count_(0)
   {
-    // Subscriber pour LaserScan
+    // Subscriber for LaserScan
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "/scan", 10, std::bind(&MinimalSubscriber::scan_callback, this, _1));
     
-    // Subscriber pour Counter
+    // Subscriber for Counter
     counter_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
       "/data", 10, std::bind(&MinimalSubscriber::counter_callback, this, _1));
     
-    RCLCPP_INFO(this->get_logger(), "LIDAR Subscriber démarré - Topics: /scan, /data");
+    RCLCPP_INFO(this->get_logger(), "LIDAR Subscriber started - Topics: /scan, /data");
   }
 
 private:
   void counter_callback(const std_msgs::msg::Int32::SharedPtr msg) const
   {
-    RCLCPP_INFO(this->get_logger(), "📊 Counter reçu: %d", msg->data);
+    RCLCPP_INFO(this->get_logger(), "📊 Counter received: %d", msg->data);
   }
 
   void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
   {
     scan_count_++;
     
-    // Afficher info générale du scan
+    // Print the general scan info
     RCLCPP_INFO(this->get_logger(), 
       "\n════════════════════════════════════════════\n"
-      "🔍 SCAN LIDAR #%zu reçu\n"
+      "🔍 LIDAR SCAN #%zu received\n"
       "Frame ID: %s\n"
-      "Nombre de points: %zu\n"
+      "Number of points: %zu\n"
       "Angle Min/Max: %.2f / %.2f rad (%.1f° / %.1f°)\n"
       "Angle Increment: %.4f rad (%.2f°)\n"
       "Range Min/Max: %.2f / %.2f m\n"
@@ -51,7 +51,7 @@ private:
       msg->angle_increment * 180.0f / M_PI,
       msg->range_min, msg->range_max);
     
-    // Trouver l'obstacle le plus proche
+    // Find the closest obstacle
     float closest_range = msg->range_max + 1.0f;
     int closest_idx = -1;
     float front_min_distance = msg->range_max + 1.0f;
@@ -61,16 +61,16 @@ private:
     {
       float r = msg->ranges[i];
       
-      // Trouver minimum global
+      // Find the global minimum
       if(r < closest_range && r >= msg->range_min && r <= msg->range_max)
       {
         closest_range = r;
         closest_idx = i;
       }
       
-      // Trouver minimum en avant (±15° autour de 0°)
+      // Find the minimum ahead (±15° around 0°)
       float angle_deg = i * msg->angle_increment * 180.0f / M_PI;
-      if(angle_deg > 345.0f || angle_deg < 15.0f)  // Cône frontal ±15°
+      if(angle_deg > 345.0f || angle_deg < 15.0f)  // Front cone ±15°
       {
         if(r < front_min_distance && r >= msg->range_min && r <= msg->range_max)
         {
@@ -80,13 +80,13 @@ private:
       }
     }
     
-    // Afficher résultats
+    // Print the results
     if(closest_idx >= 0)
     {
       float angle = closest_idx * msg->angle_increment;
       float angle_deg = angle * 180.0f / M_PI;
       RCLCPP_WARN(this->get_logger(),
-        "⚠️  Obstacle le plus proche: %.2f m @ indice %d (angle: %.1f°)",
+        "⚠️  Closest obstacle: %.2f m @ index %d (angle: %.1f°)",
         closest_range, closest_idx, angle_deg);
     }
     
@@ -95,11 +95,11 @@ private:
       float angle = front_min_idx * msg->angle_increment;
       float angle_deg = angle * 180.0f / M_PI;
       RCLCPP_ERROR(this->get_logger(),
-        "🚨 DANGER! Obstacle devant: %.2f m @ %.1f° (trop proche!)",
+        "🚨 DANGER! Obstacle ahead: %.2f m @ %.1f° (too close!)",
         front_min_distance, angle_deg);
     }
     
-    // Afficher statistiques sur les distances
+    // Print the distance statistics
     float avg_distance = 0.0f;
     int valid_points = 0;
     
@@ -116,18 +116,18 @@ private:
     {
       avg_distance /= valid_points;
       RCLCPP_INFO(this->get_logger(),
-        "📈 Statistiques - Points valides: %d / %zu, Distance moyenne: %.2f m",
+        "📈 Statistics - Valid points: %d / %zu, Mean distance: %.2f m",
         valid_points, msg->ranges.size(), avg_distance);
     }
     
-    // Afficher les 5 premiers points (pour debug)
+    // Print the first 5 points (for debugging)
     if(msg->ranges.size() > 0)
     {
-      RCLCPP_DEBUG(this->get_logger(), "Premiers points LIDAR:");
+      RCLCPP_DEBUG(this->get_logger(), "First LIDAR points:");
       for(size_t i = 0; i < std::min(size_t(5), msg->ranges.size()); ++i)
       {
         RCLCPP_DEBUG(this->get_logger(),
-          "  Point %zu: distance=%.3f m, intensité=%.1f",
+          "  Point %zu: distance=%.3f m, intensity=%.1f",
           i, msg->ranges[i], 
           i < msg->intensities.size() ? msg->intensities[i] : 0.0f);
       }

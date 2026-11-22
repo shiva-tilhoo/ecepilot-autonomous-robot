@@ -1,91 +1,91 @@
 #!/bin/bash
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # directory of this script
 
-# Script de compilation et déploiement complet
-# Utilisation: ./deploy_lidar.sh
+# Full build and deployment check script
+# Usage: ./deploy_lidar.sh
 
 set -e  # Exit on error
 
 echo "========================================"
-echo "🚀 Compilation LIDAR 360° - Système Complet"
+echo "🚀 LIDAR 360° build - full system"
 echo "========================================"
 echo ""
 
-# ============ ÉTAPE 1: Compiler ROS2 ============
-echo "📦 [1/3] Compilation ROS2..."
+# ============ STEP 1: Build ROS2 ============
+echo "📦 [1/3] Building ROS2..."
 cd "$HERE"
 
 source install/setup.bash 2>/dev/null || source /opt/ros/humble/setup.bash
-echo "   ✓ Source d'environnement ROS2 chargée"
+echo "   ✓ ROS2 environment sourced"
 
-colcon build --packages-select cpp_pubsub 2>&1 | grep -E "(error|warning|Compiling|Linking)" || echo "   ✓ Build ROS2 réussi"
+colcon build --packages-select cpp_pubsub 2>&1 | grep -E "(error|warning|Compiling|Linking)" || echo "   ✓ ROS2 build succeeded"
 source install/setup.bash
-echo "   ✓ Code ROS2 compilé avec succès"
+echo "   ✓ ROS2 code built successfully"
 echo ""
 
-# ============ ÉTAPE 2: Vérifier ESP32 ============
-echo "💾 [2/3] Vérification du code ESP32..."
+# ============ STEP 2: Check the ESP32 code ============
+echo "💾 [2/3] Checking the ESP32 code..."
 cd "$HERE/../firmware"
 
 if ! grep -q "LidarCircularBuffer" src/main.cpp; then
-    echo "   ✗ Erreur: Buffer circulaire non trouvé!"
+    echo "   ✗ Error: circular buffer not found!"
     exit 1
 fi
-echo "   ✓ Buffer circulaire: OK"
+echo "   ✓ Circular buffer: OK"
 
 if ! grep -q "LIDAR_BUFFER_SIZE 720" src/main.cpp; then
-    echo "   ✗ Erreur: Taille du buffer invalide!"
+    echo "   ✗ Error: invalid buffer size!"
     exit 1
 fi
-echo "   ✓ Taille du buffer: 720 points (60 frames)"
+echo "   ✓ Buffer size: 720 points (60 frames)"
 
 if ! grep -q "rcl_publish(&pub_lidar" src/main.cpp; then
-    echo "   ✗ Erreur: Publication LIDAR non trouvée!"
+    echo "   ✗ Error: LIDAR publication not found!"
     exit 1
 fi
 echo "   ✓ Publication LaserScan: OK"
 echo ""
 
-# ============ ÉTAPE 3: Vérifier fichiers config ============
-echo "⚙️  [3/3] Vérification des fichiers de configuration..."
+# ============ STEP 3: Check the config files ============
+echo "⚙️  [3/3] Checking the configuration files..."
 cd "$HERE/src/cpp_pubsub/launch"
 
-if ! grep -q "LaserScan (Tous les 360 points)" lidar.rviz; then
-    echo "   ✗ Erreur: Configuration RViz non mise à jour!"
+if ! grep -q "LaserScan 360" lidar.rviz; then
+    echo "   ✗ Error: RViz configuration not updated!"
     exit 1
 fi
-echo "   ✓ Configuration RViz: OK (360 points, couleur rouge)"
+echo "   ✓ RViz configuration: OK (360 points, red)"
 
-if ! grep -q "360 points LIDAR" agent_launch.py; then
-    echo "   ✗ Erreur: Guide de lancement non mis à jour!"
+if ! grep -q "360 LIDAR points" agent_launch.py; then
+    echo "   ✗ Error: launch guide not updated!"
     exit 1
 fi
-echo "   ✓ Guide de lancement: OK"
+echo "   ✓ Launch guide: OK"
 
 echo ""
 echo "========================================"
-echo "✅ Système LIDAR 360° prêt au lancement!"
+echo "✅ LIDAR 360° system ready to launch!"
 echo "========================================"
 echo ""
-echo "📋 ÉTAPES SUIVANTES:"
+echo "📋 NEXT STEPS:"
 echo ""
-echo "1️⃣  Terminal 1 - Lancer l'agent micro-ROS:"
+echo "1️⃣  Terminal 1 - Start the micro-ROS agent:"
 echo "   docker run -it --rm microros/micro-ros-docker:humble \\"
 echo "     ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888"
 echo ""
-echo "2️⃣  Terminal 2 - Téléverser le code ESP32 (PlatformIO)"
-echo "   Ouvrir: $HERE/../firmware"
-echo "   Cliquer sur 'Upload' dans PlatformIO"
+echo "2️⃣  Terminal 2 - Flash the ESP32 code (PlatformIO)"
+echo "   Open: $HERE/../firmware"
+echo "   Click 'Upload' in PlatformIO"
 echo ""
-echo "3️⃣  Terminal 3 - Lancer le listener + RViz:"
+echo "3️⃣  Terminal 3 - Start the listener + RViz:"
 echo "   cd $HERE"
 echo "   source install/setup.bash"
 echo "   ros2 launch cpp_pubsub agent_launch.py"
 echo ""
-echo "🎨 RViz apparaîtra avec:"
-echo "   • Grille XY grise (référence)"
-echo "   • Points LIDAR en rouge (360 points)"
-echo "   • Frame fixe: lidar_link"
+echo "🎨 RViz will show:"
+echo "   • Grey XY grid (reference)"
+echo "   • LIDAR points in red (360 points)"
+echo "   • Fixed frame: lidar_link"
 echo ""
-echo "📖 Voir le guide complet: GUIDE_LIDAR_360_COMPLET.md"
+echo "📖 See the full guide: LIDAR_360_GUIDE.md"
 echo ""

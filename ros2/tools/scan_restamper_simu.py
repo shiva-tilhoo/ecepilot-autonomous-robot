@@ -7,7 +7,7 @@ from sensor_msgs.msg import LaserScan
 class ScanRestamperSimu(Node):
     def __init__(self):
         super().__init__('scan_restamper_simu')
-        # Utilise BEST_EFFORT pour meilleure compatibilité
+        # Uses BEST_EFFORT for better compatibility
         qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
@@ -19,7 +19,7 @@ class ScanRestamperSimu(Node):
         self.target_hz = 15.0
         self.min_period_ns = int(1e9 / self.target_hz)
         self.last_pub_ns = 0
-        self.get_logger().info('✅ Restamper démarré - Inpute: /scan_raw -> Output: /scan')
+        self.get_logger().info('✅ Restamper started - Input: /scan_raw -> Output: /scan')
 
     def callback(self, msg):
         now_ns = self.get_clock().now().nanoseconds
@@ -27,13 +27,13 @@ class ScanRestamperSimu(Node):
             return
         self.last_pub_ns = now_ns
 
-        # Mets à jour le timestamp avec l'horloge ROS courante
+        # Update the timestamp with the current ROS clock
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "laser_link"
         self.pub.publish(msg)
         self.scan_count += 1
         if self.scan_count % 30 == 0:
-            self.get_logger().info(f'✅ {self.scan_count} scans traités, {len(msg.ranges)} rayons par scan')
+            self.get_logger().info(f'✅ {self.scan_count} scans processed, {len(msg.ranges)} rays per scan')
 
 def main():
     try:

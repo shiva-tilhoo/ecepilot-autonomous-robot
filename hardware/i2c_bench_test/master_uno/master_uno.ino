@@ -5,15 +5,15 @@
 // ---------- Config OLED ----------
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_RESET    -1          // Pas de reset matériel
-#define OLED_ADDR     0x3C        // Adresse I2C classique des SSD1306
+#define OLED_RESET    -1          // No hardware reset
+#define OLED_ADDR     0x3C        // Usual I2C address of the SSD1306
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // ---------- Config I2C ----------
-#define SLAVE_ADDR    0x08        // Adresse I2C de l'ESP-01
+#define SLAVE_ADDR    0x08        // I2C address of the ESP-01
 
-// ---------- Variables de test ----------
+// ---------- Test variables ----------
 uint32_t lastValue    = 0;
 bool     firstFrame   = true;
 uint32_t lostFrames   = 0;
@@ -23,17 +23,17 @@ uint32_t readErrors   = 0;
 unsigned long lastRefreshSerial = 0;
 
 void setup() {
-  // Moniteur série pour debug
+  // Serial monitor for debugging
   Serial.begin(115200);
   delay(500);
   Serial.println(F("=== Test I2C Master + OLED ==="));
 
   // I2C Master
-  Wire.begin();  // UNO en maitre sur A4/A5
+  Wire.begin();  // UNO as master on A4/A5
 
   // Init OLED
   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
-    Serial.println(F("Erreur init OLED !"));
+    Serial.println(F("OLED init error!"));
     while (1);
   }
 
@@ -47,9 +47,9 @@ void setup() {
 }
 
 void loop() {
-  // 1) Lire une trame I2C (4 octets = uint32_t)
+  // 1) Read an I2C frame (4 bytes = uint32_t)
   uint32_t value;
-  bool ok = lireTrameI2C(value);
+  bool ok = readI2CFrame(value);
 
   if (ok) {
     totalFrames++;
@@ -59,20 +59,20 @@ void loop() {
         if (value > lastValue) {
           uint32_t diff = value - lastValue;
           if (diff > 0) {
-            uint32_t perdues = diff - 1;
-            lostFrames += perdues;
-            Serial.print(F("[LOSS] Saut detecte: dernier="));
+            uint32_t lost = diff - 1;
+            lostFrames += lost;
+            Serial.print(F("[LOSS] Gap detected: last="));
             Serial.print(lastValue);
-            Serial.print(F(" recu="));
+            Serial.print(F(" received="));
             Serial.print(value);
-            Serial.print(F("  (trames perdues estimees: "));
-            Serial.print(perdues);
+            Serial.print(F("  (estimated lost frames: "));
+            Serial.print(lost);
             Serial.println(F(")"));
           }
         } else {
-          Serial.print(F("[WARN] Ordre inverse: recu "));
+          Serial.print(F("[WARN] Out of order: received "));
           Serial.print(value);
-          Serial.print(F(" apres "));
+          Serial.print(F(" after "));
           Serial.println(lastValue);
         }
       }
@@ -85,36 +85,36 @@ void loop() {
     readErrors++;
   }
 
-  // 2) Affichage OLED
-  afficherOLED(ok, lastValue);
+  // 2) OLED display
+  showOnOLED(ok, lastValue);
 
-  // 3) Debug série périodique
+  // 3) Periodic serial debug
   unsigned long now = millis();
   if (now - lastRefreshSerial >= 2000) {
     lastRefreshSerial = now;
-    Serial.println(F("----- STATUT I2C -----"));
-    Serial.print(F("Trames recues       : "));
+    Serial.println(F("----- I2C STATUS -----"));
+    Serial.print(F("Frames received     : "));
     Serial.println(totalFrames);
-    Serial.print(F("Trames perdues (est): "));
+    Serial.print(F("Frames lost (est.)  : "));
     Serial.println(lostFrames);
-    Serial.print(F("Erreurs lecture I2C : "));
+    Serial.print(F("I2C read errors     : "));
     Serial.println(readErrors);
-    Serial.print(F("Derniere valeur     : "));
+    Serial.print(F("Last value          : "));
     Serial.println(lastValue);
     Serial.println(F("----------------------"));
   }
 
-  delay(50); // fréquence de demande ~20 Hz
+  delay(50); // request rate ~20 Hz
 }
 
-// ----------- Fonctions -----------
+// ----------- Functions -----------
 
-bool lireTrameI2C(uint32_t &value) {
+bool readI2CFrame(uint32_t &value) {
   const uint8_t toRead = 4;
 
   Wire.requestFrom((int)SLAVE_ADDR, (int)toRead);
   if (Wire.available() != toRead) {
-    // Pas assez d'octets -> erreur de lecture
+    // Not enough bytes -> read error
     return false;
   }
 
@@ -131,25 +131,25 @@ bool lireTrameI2C(uint32_t &value) {
   return true;
 }
 
-void afficherOLED(bool ok, uint32_t currentValue) {
+void showOnOLED(bool ok, uint32_t currentValue) {
   display.clearDisplay();
   display.setCursor(0, 0);
 
   display.println(F("Test I2C ESP-01"));
 
-  display.print(F("Etat I2C: "));
-  display.println(ok ? F("OK") : F("ERREUR"));
+  display.print(F("I2C state: "));
+  display.println(ok ? F("OK") : F("ERROR"));
 
-  display.print(F("Val recu : "));
+  display.print(F("Value rx : "));
   display.println(currentValue);
 
-  display.print(F("Trames OK : "));
+  display.print(F("Frames OK : "));
   display.println(totalFrames);
 
-  display.print(F("Perdues   : "));
+  display.print(F("Lost      : "));
   display.println(lostFrames);
 
-  display.print(F("Err lecture: "));
+  display.print(F("Read errors: "));
   display.println(readErrors);
 
   display.display();

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stack rapide: RF2O + SLAM optimisé pour corridors
+# Fast stack: RF2O + SLAM tuned for corridors
 
 echo "🧹 Cleaning up..."
 pkill -9 simu_lidar 2>/dev/null || true
@@ -12,7 +12,7 @@ sleep 2
 
 echo ""
 echo "==========================================="
-echo "🚀 RF2O + SLAM RAPIDE (Corridors)"
+echo "🚀 FAST RF2O + SLAM (corridors)"
 echo "==========================================="
 echo ""
 
@@ -48,7 +48,7 @@ ros2 run rf2o_laser_odometry rf2o_laser_odometry_node \
 RF2O_PID=$!
 sleep 2
 
-# 6. SLAM Toolbox (config rapide!)
+# 6. SLAM Toolbox (fast config!)
 echo "6️⃣  SLAM Toolbox (fast corridor mode)..."
 ros2 run slam_toolbox async_slam_toolbox_node \
   --ros-args \

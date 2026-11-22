@@ -22,7 +22,7 @@ except Exception:
 WIDTH, HEIGHT = 800, 600
 MAP_RES       = 0.0133
 NUM_RAYS      = 180
-CIRCUIT_PATH  = "image_corridor_grossi.png"
+CIRCUIT_PATH  = "image_corridor_widened.png"
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -43,35 +43,35 @@ server_sock.listen(1)
 server_sock.setblocking(False)
 
 robot_pos, robot_th = [150.0, 250.0], 0.0
-start_pos = [150.0, 250.0]  # 🎯 POINT DE DÉPART - pour comparaison visuelle
+start_pos = [150.0, 250.0]  # 🎯 START POINT - for visual comparison
 lidar_conn = None
 
-# --- PARAMÈTRES AUTONOMIE (EXACTEMENT wall_centering_node) ---
-CRUISE_SPEED = 0.7        # 🐢 Vitesse réduite pour meilleure précision RF2O
-ALPHA_ROT = 0.95          # Amortissement très fort (comme wall_centering)
-DEADZONE = 0.15           # Zone morte AUGMENTÉE (mètres) - pour rester au centre sans osciller
-GAIN_ROT = 0.4            # Gain très doux pour "glisser" dans les virages
-MIN_ROTATION = 0.38       # Seuil minimal pour faire bouger les moteurs
-MAX_LINEAR_SPEED = 0.7    # Cap global vitesse linéaire (px/frame)
+# --- AUTONOMY PARAMETERS (SAME AS wall_centering_node) ---
+CRUISE_SPEED = 0.7        # 🐢 Reduced speed for better RF2O accuracy
+ALPHA_ROT = 0.95          # Very strong damping (as in wall_centering)
+DEADZONE = 0.15           # LARGER dead zone (metres) - stays centred without oscillating
+GAIN_ROT = 0.4            # Very gentle gain to "glide" through the turns
+MIN_ROTATION = 0.38       # Minimum threshold that makes the motors move
+MAX_LINEAR_SPEED = 0.7    # Global linear speed cap (px/frame)
 MAX_ANGULAR_SPEED = 0.03  # Cap global rotation (rad/frame)
 
-# DÉLAI DE DÉMARRAGE - Attend que SLAM soit prêt avant d'activer autonome
-STARTUP_DELAY_SECONDS = 15.0  # ⏱️ 15 secondes pour laisser SLAM s'initialiser complètement
+# START-UP DELAY - waits for SLAM to be ready before enabling autonomy
+STARTUP_DELAY_SECONDS = 15.0  # ⏱️ 15 seconds to let SLAM initialise completely
 
-# ARRÊT AUTOMATIQUE AU RETOUR - Pour mapper un circuit complet
-ENABLE_AUTO_STOP = True        # 🔄 True = Arrêt auto en 2 phases (retour puis +2m), False = boucle continue
-AUTO_STOP_DISTANCE = 0.05      # Distance au départ pour arrêt automatique (mètres)
-MIN_DISTANCE_TRAVELED = 3.0   # Distance minimale avant de permettre l'arrêt (évite arrêt immédiat)
-EXTRA_DISTANCE_AFTER_RETURN = 2.0  # Distance à parcourir APRÈS retour au départ avant arrêt (mètres)
-LEAVE_START_DISTANCE = 0.60    # Doit d'abord s'éloigner du départ avant de valider le retour
-RETURN_DETECTION_DISTANCE = 0.20  # Tolérance de détection du passage au départ
-LAP_SAMPLE_DISTANCE = 0.08        # Échantillonnage des points de trajectoire pendant le tour
-NAV2_WAYPOINT_SPACING = 0.30      # Espacement minimal entre waypoints envoyés à Nav2
-NAV2_SAFE_WAYPOINT_SPACING = 0.45  # Espacement plus large pour éviter les points trop serrés
-NAV2_ENTRY_LOOKAHEAD_M = 1.2      # Point d'entrée vers le bon sens avant retour au départ
-NAV2_ROUTE_GOAL_SPACING = 1.20    # Espacement des goals NavigateToPose séquentiels
+# AUTOMATIC STOP ON RETURN - to map a complete lap
+ENABLE_AUTO_STOP = True        # 🔄 True = 2-phase automatic stop (return then +2m), False = continuous loop
+AUTO_STOP_DISTANCE = 0.05      # Distance to the start for the automatic stop (metres)
+MIN_DISTANCE_TRAVELED = 3.0   # Minimum distance before stopping is allowed (avoids an immediate stop)
+EXTRA_DISTANCE_AFTER_RETURN = 2.0  # Distance to drive AFTER returning to the start before stopping (metres)
+LEAVE_START_DISTANCE = 0.60    # Must first move away from the start before a return can be validated
+RETURN_DETECTION_DISTANCE = 0.20  # Detection tolerance for passing the start
+LAP_SAMPLE_DISTANCE = 0.08        # Sampling of the trajectory points during the lap
+NAV2_WAYPOINT_SPACING = 0.30      # Minimum spacing between waypoints sent to Nav2
+NAV2_SAFE_WAYPOINT_SPACING = 0.45  # Wider spacing to avoid points that are too close
+NAV2_ENTRY_LOOKAHEAD_M = 1.2      # Entry point in the right direction before returning to the start
+NAV2_ROUTE_GOAL_SPACING = 1.20    # Spacing of the sequential NavigateToPose goals
 
-# MODE SIMPLE: retour sans Nav2 (A* + suivi PID)
+# SIMPLE MODE: return without Nav2 (A* + PID following)
 USE_SIMPLE_ASTAR_RETURN = True
 SIMPLE_ASTAR_CELL_PX = 4
 SIMPLE_ASTAR_INFLATION_CELLS = 3
@@ -79,7 +79,7 @@ SIMPLE_LOOKAHEAD_PX = 10.0
 SIMPLE_GOAL_TOLERANCE_PX = 12.0
 SIMPLE_KP_HEADING = 1.8
 SIMPLE_KD_HEADING = 0.25
-SIMPLE_MAX_SPEED_PX = 0.72   # Vitesse plus élevée UNIQUEMENT pendant le suivi de trajectoire calculée
+SIMPLE_MAX_SPEED_PX = 0.72   # Higher speed ONLY while following a computed trajectory
 SIMPLE_FULL_LOOP_SPACING_M = 0.18
 SIMPLE_SHORTCUT_CLEARANCE_PX = 10
 SIMPLE_SHORTCUT_MAX_SKIP = 80
@@ -88,10 +88,10 @@ SIMPLE_REQUIRE_FULL_LOOP = True
 SIMPLE_ALLOW_ASTAR_FALLBACK = False
 SIMPLE_MIN_PATH_KEEP_RATIO = 0.55
 
-auto_mode = False         # ⏳ Démarre en MANUEL, s'activera automatiquement après délai
-startup_timer = 0.0       # Compteur pour activer auto après délai
-max_distance_reached = 0.0  # Distance max atteinte depuis le départ
-prev_w = 0.0              # Rotation précédente (filtre)
+auto_mode = False         # ⏳ Starts in MANUAL mode, switches to auto after the delay
+startup_timer = 0.0       # Counter that enables auto mode after the delay
+max_distance_reached = 0.0  # Max distance reached from the start
+prev_w = 0.0              # Previous rotation (filter)
 loop_return_detected = False
 extra_distance_after_return = 0.0
 has_left_start_zone = False
@@ -116,7 +116,7 @@ simple_prev_heading_err = 0.0
 simple_status = "IDLE"
 
 slam_freeze_requested = False
-slam_freeze_pose_x = None  # Fixe la position du robot quand SLAM gèle
+slam_freeze_pose_x = None  # Holds the robot position when SLAM freezes
 slam_freeze_pose_y = None
 slam_freeze_pose_theta = None
 
@@ -273,7 +273,7 @@ class Nav2InterfaceNode(Node):
             self.get_logger().warning(f'Goal result error: {ex}')
 
     def publish_frozen_map_to_odom_transform(self):
-        """Re-publie map->odom avec un timestamp frais quand SLAM est figé."""
+        """Re-publishes map->odom with a fresh timestamp while SLAM is frozen."""
         try:
             if not rclpy.ok():
                 return
@@ -314,7 +314,7 @@ class Nav2InterfaceNode(Node):
 
             if not self.nav_client.wait_for_server(timeout_sec=1.0):
                 nav2_status = "WAIT_ACTION_SERVER"
-                self.get_logger().warning('Nav2 action server /navigate_to_pose indisponible (retry)')
+                self.get_logger().warning('Nav2 action server /navigate_to_pose unavailable (retry)')
                 return False
 
             gx, gy = self.find_nearest_free_goal(x_m, y_m)
@@ -331,7 +331,7 @@ class Nav2InterfaceNode(Node):
             goal_msg.pose.pose.orientation.w = math.cos(half)
 
             self.get_logger().info(
-                f'🎯 Envoi goal Nav2 (retour départ): x={gx:.3f} y={gy:.3f} yaw={yaw_rad:.3f}'
+                f'🎯 Sending Nav2 goal (return to start): x={gx:.3f} y={gy:.3f} yaw={yaw_rad:.3f}'
             )
             send_future = self.nav_client.send_goal_async(goal_msg)
             send_future.add_done_callback(self._on_goal_response)
@@ -351,7 +351,7 @@ class Nav2InterfaceNode(Node):
 
             if not self.nav_through_client.wait_for_server(timeout_sec=1.0):
                 nav2_status = "WAIT_THROUGH_SERVER"
-                self.get_logger().warning('Nav2 action server /navigate_through_poses indisponible (retry)')
+                self.get_logger().warning('Nav2 action server /navigate_through_poses unavailable (retry)')
                 return False
 
             goal_msg = NavigateThroughPoses.Goal()
@@ -397,7 +397,7 @@ class Nav2InterfaceNode(Node):
                 return False
 
             goal_msg.poses = poses
-            self.get_logger().info(f'🧭 Envoi NavigateThroughPoses avec {len(poses)} waypoints')
+            self.get_logger().info(f'🧭 Sending NavigateThroughPoses with {len(poses)} waypoints')
             send_future = self.nav_through_client.send_goal_async(goal_msg)
             send_future.add_done_callback(self._on_goal_response)
             nav2_status = "THROUGH_SENT"
@@ -431,12 +431,12 @@ nav2_interface = start_nav2_interface()
 
 def get_lidar_ranges(pos, theta):
     ranges = []
-    max_range = 2.0  # Portée LIDAR (m)
+    max_range = 2.0  # LIDAR range (m)
     for i in range(NUM_RAYS):
         angle = (2.0 * math.pi * i / NUM_RAYS) + theta
         cos_a, sin_a = math.cos(angle), math.sin(angle)
         dist = max_range
-        # Step=1 au lieu de 2 pour ne pas sauter de pixels dans les coins
+        # Step=1 instead of 2 so that no pixel is skipped in the corners
         for r in range(5, int(max_range/MAP_RES), 1):
             tx, ty = int(pos[0] + r*cos_a), int(pos[1] + r*sin_a)
             if not (0 <= tx < WIDTH and 0 <= ty < HEIGHT) or circuit_surf.get_at((tx, ty))[0] < 80:
@@ -587,7 +587,7 @@ def compute_simple_follow_command(robot_pos_px, robot_theta_rad, dt_s):
     if dist < SIMPLE_LOOKAHEAD_PX:
         linear *= 0.6
 
-    # Freinage progressif sur la fin pour éviter de dépasser le dernier point
+    # Progressive braking at the end to avoid overshooting the last point
     if simple_path_idx >= len(simple_path_px) - 2:
         final_scale = min(1.0, max(0.08, final_dist / SIMPLE_FINAL_BRAKE_RADIUS_PX))
         linear *= final_scale
@@ -658,9 +658,9 @@ def build_nav2_sequential_route_goals(current_x_m, current_y_m):
     if len(lap_points_m) < 10:
         return []
 
-    # On force le choix de départ dans le début de la trajectoire enregistrée,
-    # car le switch vers Nav2 se fait juste après être repassé au départ +2m.
-    # Cela évite de "sauter" vers un point proche mais dans le mauvais sens.
+    # The start is forced within the beginning of the recorded trajectory,
+    # because the switch to Nav2 happens right after passing the start +2m.
+    # This avoids "jumping" to a close point that faces the wrong way.
     search_end = max(5, int(0.45 * len(lap_points_m)))
     nearest_index = 0
     best_d2 = 1e18
@@ -702,7 +702,7 @@ def build_simple_full_loop_path_px(current_x_m, current_y_m):
             best_d2 = d2
             nearest_index = i
 
-    # On veut terminer au point de départ (pas revenir vers le début du retour)
+    # The goal is to end at the start point (not back at the beginning of the return)
     sx_m = start_pos[0] * MAP_RES
     sy_m = start_pos[1] * MAP_RES
     goal_index = 0
@@ -713,7 +713,7 @@ def build_simple_full_loop_path_px(current_x_m, current_y_m):
             goal_best_d2 = d2
             goal_index = i
 
-    # Segment avant: nearest_index -> goal_index (avec wrap si nécessaire)
+    # Forward segment: nearest_index -> goal_index (wrapping if needed)
     if nearest_index <= goal_index:
         ordered_loop = lap_points_m[nearest_index:goal_index + 1]
     else:
@@ -744,12 +744,12 @@ def build_simple_full_loop_path_px(current_x_m, current_y_m):
 
     raw_len = len(path_px)
 
-    # Optimisation: raccourcis sûrs tout en conservant l'ordre de la boucle
+    # Optimisation: safe shortcuts that keep the order of the loop
     optimized = [path_px[0]]
     i = 0
     while i < len(path_px) - 1:
         best_next = i + 1
-        # Limite stricte du saut pour éviter de "couper" un gros morceau de boucle
+        # Strict limit on the jump to avoid "cutting" a large part of the loop
         j_max = min(len(path_px) - 1, i + min(SIMPLE_SHORTCUT_MAX_SKIP, 16))
         for j in range(j_max, i + 1, -1):
             if is_segment_clear_with_clearance(path_px[i], path_px[j], SIMPLE_SHORTCUT_CLEARANCE_PX):
@@ -758,11 +758,11 @@ def build_simple_full_loop_path_px(current_x_m, current_y_m):
         optimized.append(path_px[best_next])
         i = best_next
 
-    # Si optimisation trop agressive, on garde la version brute échantillonnée
+    # If the optimisation is too aggressive, keep the raw sampled version
     if len(optimized) < max(3, int(raw_len * SIMPLE_MIN_PATH_KEEP_RATIO)):
         optimized = list(path_px)
 
-    # Petit lissage (moyenne glissante) sans toucher les extrémités
+    # Light smoothing (moving average) that leaves the end points untouched
     smoothed = [optimized[0]]
     for k in range(1, len(optimized) - 1):
         x = int((optimized[k - 1][0] + optimized[k][0] + optimized[k + 1][0]) / 3)
@@ -785,44 +785,44 @@ def stop_slam_and_freeze_map(robot_x_m=None, robot_y_m=None, robot_theta_rad=Non
             slam_freeze_pose_y = robot_y_m
             slam_freeze_pose_theta = robot_theta_rad
         subprocess.run(['ros2', 'service', 'call', '/freeze_scan', 'std_srvs/srv/Empty'], timeout=2, capture_output=True)
-        print("🔒 Service freeze_scan appelé - SLAM et carte figés")
+        print("🔒 freeze_scan service called - SLAM and map frozen")
         time.sleep(0.5)
         slam_freeze_requested = True
     except Exception as ex:
-        print(f"⚠️ Impossible d'appeler freeze_scan: {ex}")
+        print(f"⚠️ Could not call freeze_scan: {ex}")
         slam_freeze_requested = True
 def autonomous_control(ranges):
     """
-    Logique de centrage dans le couloir (EXACTEMENT comme wall_centering_node)
-    Retourne: (vitesse_lineaire, vitesse_angulaire)
+    Corridor centring logic (SAME AS wall_centering_node)
+    Returns: (linear_speed, angular_speed)
     """
     global prev_w
     
     ranges = np.array(ranges)
-    # IMPORTANT: Pas de limite haute! On limite seulement à 2.0m pour les valeurs invalides
-    # Comme dans wall_centering_node: ranges = np.where(np.isfinite(ranges) & (ranges > 0.15), ranges, 2.0)
+    # IMPORTANT: no upper limit! Only invalid values are capped at 2.0m
+    # As in wall_centering_node: ranges = np.where(np.isfinite(ranges) & (ranges > 0.15), ranges, 2.0)
     ranges = np.where((ranges > 0.15) & np.isfinite(ranges), ranges, 2.0)
     
-    # Dans notre simulateur: rayon 0 = avant (angle robot_th)
+    # In this simulator: ray 0 = front (angle robot_th)
     idx_front = 0
     
-    # On regarde sur les côtés (60°) mais avec une FENÊTRE ÉTROITE
-    # pour ne pas voir les murs au loin qui gênent lors des virages
-    side_angle = NUM_RAYS // 6      # 60° = 180/6 = 30 rayons (direction latérale)
-    window = int(NUM_RAYS * 10 / 180)  # RÉDUIT à 10° (au lieu de 20°) pour ne voir que le mur IMMÉDIAT
+    # Look at the sides (60°) but with a NARROW WINDOW
+    # so that distant walls do not get in the way in turns
+    side_angle = NUM_RAYS // 6      # 60° = 180/6 = 30 rays (side direction)
+    window = int(NUM_RAYS * 10 / 180)  # REDUCED to 10° (instead of 20°) to see only the NEAREST wall
     
-    # Indices comme avant (ce qui marchait mieux)
+    # Same indices as before (this worked better)
     idx_left = (idx_front - side_angle) % NUM_RAYS
     idx_right = (idx_front + side_angle) % NUM_RAYS
     
-    # Mesure de la distance aux murs latéraux (moyenne sur ±10° seulement)
-    # Cela évite de voir le mur du virage au loin pendant les zigzag
+    # Distance to the side walls (average over ±10° only)
+    # This avoids seeing the far wall of the turn while zigzagging
     left_start = (idx_left - window) % NUM_RAYS
     left_end = (idx_left + window) % NUM_RAYS
     right_start = (idx_right - window) % NUM_RAYS
     right_end = (idx_right + window) % NUM_RAYS
     
-    # Gestion des indices circulaires
+    # Circular index handling
     if left_start < left_end:
         dist_l = np.mean(ranges[left_start:left_end])
     else:
@@ -833,17 +833,17 @@ def autonomous_control(ranges):
     else:
         dist_r = np.mean(np.concatenate([ranges[right_start:], ranges[:right_end]]))
     
-    # Distance devant pour freiner si le virage est trop serré (±10 rayons)
+    # Distance ahead to brake when the turn is too tight (±10 rays)
     dist_f = np.mean(ranges[max(0, idx_front-10):min(NUM_RAYS, idx_front+10)])
     
-    # --- LOGIQUE SIMPLE (COMME WALL_CENTERING_NODE) ---
-    # Pas de modes compliqués, juste centrage progressif
+    # --- SIMPLE LOGIC (AS IN WALL_CENTERING_NODE) ---
+    # No complicated modes, just progressive centring
     error = dist_l - dist_r
     
     if abs(error) < DEADZONE:
         target_w = 0.0
     else:
-        # Correction proportionnelle très douce
+        # Very gentle proportional correction
         target_w = -error * GAIN_ROT
         if abs(target_w) < MIN_ROTATION:
             target_w = np.sign(target_w) * MIN_ROTATION
@@ -851,24 +851,24 @@ def autonomous_control(ranges):
     emergency_mode = False
     warning_mode = False
     
-    # --- FILTRE ANTI-ZIGZAG (SIMPLE COMME WALL_CENTERING) ---
+    # --- ANTI-ZIGZAG FILTER (SIMPLE, AS IN WALL_CENTERING) ---
     smoothed_w = (ALPHA_ROT * prev_w) + ((1 - ALPHA_ROT) * target_w)
     
-    # Limite accélération rotation
-    max_delta = 0.04  # Comme wall_centering_node
+    # Limit the rotational acceleration
+    max_delta = 0.04  # As in wall_centering_node
     diff = smoothed_w - prev_w
     if abs(diff) > max_delta:
         smoothed_w = prev_w + np.sign(diff) * max_delta
     
     prev_w = smoothed_w
     
-    # Vitesse linéaire (SIMPLE: ralentit juste si mur devant)
+    # Linear speed (SIMPLE: only slows down when there is a wall ahead)
     if dist_f > 0.8:
         speed = CRUISE_SPEED
     else:
-        speed = CRUISE_SPEED * 0.7   # Ralenti si mur devant
+        speed = CRUISE_SPEED * 0.7   # Slower when there is a wall ahead
     
-    # Limite rotation avec cap global
+    # Limit the rotation with the global cap
     rotation = np.clip(smoothed_w, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED)
     speed = min(speed, MAX_LINEAR_SPEED)
     
@@ -886,51 +886,51 @@ def angle_to_quaternion(angle):
     return {'z': math.sin(half_angle), 'w': math.cos(half_angle)}
 
 def draw_hud(auto_mode, speed, rotation, dist_l, dist_r, dist_f, emergency_mode=False, warning_mode=False, dist_to_start=0, startup_timer=0, startup_delay=5.0, nav2_mode=False, simple_mode=False):
-    """Affiche les infos de débogage"""
+    """Displays the debug information"""
     y_offset = 10
     
-    # Affiche compte à rebours si pas encore en auto
+    # Show a countdown while not yet in auto mode
     if not auto_mode and startup_timer < startup_delay:
         remaining = startup_delay - startup_timer
         texts = [
-            f"⏳ ATTENTE SLAM: {remaining:.1f}s restantes...",
-            f"MODE: MANUEL (auto dans {remaining:.1f}s)",
-            f"🎯 Distance au départ: {dist_to_start:.2f}m"
+            f"⏳ WAITING FOR SLAM: {remaining:.1f}s left...",
+            f"MODE: MANUAL (auto in {remaining:.1f}s)",
+            f"🎯 Distance to start: {dist_to_start:.2f}m"
         ]
     else:
-        mode_label = 'SIMPLE' if simple_mode else ('NAV2' if nav2_mode else ('AUTONOME' if auto_mode else 'MANUEL'))
-        slam_label = '🔒 SLAM FIGÉ' if slam_freeze_requested else '🔄 SLAM ACTIF'
+        mode_label = 'SIMPLE' if simple_mode else ('NAV2' if nav2_mode else ('AUTONOMOUS' if auto_mode else 'MANUAL'))
+        slam_label = '🔒 SLAM FROZEN' if slam_freeze_requested else '🔄 SLAM ACTIVE'
         texts = [
-            f"MODE: {mode_label} (A pour changer)",
+            f"MODE: {mode_label} (A to switch)",
             (f"SIMPLE: {simple_status}" if simple_mode else (f"NAV2: {nav2_status}" if nav2_mode else f"SLAM: {slam_label}")),
-            f"Vitesse: {speed:.2f} px/f ({speed*0.0133*30:.2f} m/s)",
+            f"Speed: {speed:.2f} px/f ({speed*0.0133*30:.2f} m/s)",
             f"Rotation: {rotation:.3f} rad/s",
-            f"[ROUGE=Devant] F:{dist_f:.2f}m",
-            f"[VERT=Gauche] L:{dist_l:.2f}m",
-            f"[BLEU=Droite] R:{dist_r:.2f}m",
-            f"Centrage: {(dist_l-dist_r):.2f}m (L-R)",
-            f"🎯 Distance au départ: {dist_to_start:.2f}m"
+            f"[RED=Front] F:{dist_f:.2f}m",
+            f"[GREEN=Left] L:{dist_l:.2f}m",
+            f"[BLUE=Right] R:{dist_r:.2f}m",
+            f"Centring: {(dist_l-dist_r):.2f}m (L-R)",
+            f"🎯 Distance to start: {dist_to_start:.2f}m"
         ]
     
-    # Ajout des alertes si nécessaire
+    # Add the alerts when needed
     if emergency_mode:
-        texts.insert(1, "🚨 URGENCE CRITIQUE: <0.4m! 🚨")
+        texts.insert(1, "🚨 CRITICAL EMERGENCY: <0.4m! 🚨")
     elif warning_mode:
-        texts.insert(1, "⚠ ALERTE: Mur proche (<0.55m)")
+        texts.insert(1, "⚠ ALERT: wall close (<0.55m)")
     
     for i, txt in enumerate(texts):
         if i == 0:
             color = (0, 255, 0) if (auto_mode or nav2_mode or simple_mode) else (255, 255, 255)
         elif emergency_mode and i == 1:
-            color = (255, 0, 0)  # ROUGE VIF pour urgence critique
+            color = (255, 0, 0)  # BRIGHT RED for a critical emergency
         elif warning_mode and i == 1:
-            color = (255, 165, 0)  # ORANGE pour alerte
+            color = (255, 165, 0)  # ORANGE for an alert
         elif i == 3 or ((emergency_mode or warning_mode) and i == 4):
-            color = (255, 100, 100)  # Rouge pour F
+            color = (255, 100, 100)  # Red for F
         elif i == 4 or ((emergency_mode or warning_mode) and i == 5):
-            color = (100, 255, 100)  # Vert pour L
+            color = (100, 255, 100)  # Green for L
         elif i == 5 or ((emergency_mode or warning_mode) and i == 6):
-            color = (100, 100, 255)  # Bleu pour R
+            color = (100, 100, 255)  # Blue for R
         elif i == 6 or ((emergency_mode or warning_mode) and i == 7):
             error = dist_l - dist_r
             color = (0, 255, 0) if abs(error) < 0.08 else (255, 150, 0)
@@ -940,19 +940,19 @@ def draw_hud(auto_mode, speed, rotation, dist_l, dist_r, dist_f, emergency_mode=
         rendered = font.render(txt, True, color, (0, 0, 0))
         screen.blit(rendered, (10, y_offset + i * 20))
 
-# --- BOUCLE PRINCIPALE ---
+# --- MAIN LOOP ---
 run = True
 speed, rotation, dist_l, dist_r, dist_f = 0, 0, 0, 0, 0
 emergency_mode = False
 warning_mode = False
 
 while run:
-    # ⏱️ AUTO-ACTIVATION APRÈS DÉLAI (pour laisser SLAM s'initialiser)
+    # ⏱️ AUTO-ACTIVATION AFTER THE DELAY (lets SLAM initialise)
     if not auto_mode and startup_timer < STARTUP_DELAY_SECONDS:
-        startup_timer += 1.0/30.0  # Incrémente (30 FPS)
+        startup_timer += 1.0/30.0  # Increment (30 FPS)
         if startup_timer >= STARTUP_DELAY_SECONDS:
             auto_mode = True
-            print(f"🟢 AUTO MODE ACTIVÉ après {STARTUP_DELAY_SECONDS}s - SLAM prêt!")
+            print(f"🟢 AUTO MODE ENABLED after {STARTUP_DELAY_SECONDS}s - SLAM ready!")
     
     if not lidar_conn:
         try: 
@@ -964,24 +964,24 @@ while run:
         if e.type == pygame.QUIT: 
             run = False
         if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_a:  # Toggle autonome
+            if e.key == pygame.K_a:  # Toggle autonomous mode
                 auto_mode = not auto_mode
                 nav2_mode = False
                 simple_return_mode = False
-                prev_w = 0.0  # Reset filtre
+                prev_w = 0.0  # Reset the filter
 
-    # --- CONTRÔLE ---
+    # --- CONTROL ---
     ranges = get_lidar_ranges(robot_pos, robot_th)
     
     if auto_mode:
-        # Mode autonome
+        # Autonomous mode
         speed, rotation, dist_l, dist_r, dist_f, emergency_mode, warning_mode = autonomous_control(ranges)
         robot_pos[0] += speed * math.cos(robot_th)
         robot_pos[1] += speed * math.sin(robot_th)
         robot_th += rotation
         robot_th = normalize_angle(robot_th)
     elif simple_return_mode:
-        # Mode SIMPLE: suivi local A* + PID (sans Nav2)
+        # SIMPLE mode: local A* + PID following (without Nav2)
         speed, rotation, reached = compute_simple_follow_command(robot_pos, robot_th, 1.0 / 30.0)
         robot_pos[0] += speed * math.cos(robot_th)
         robot_pos[1] += speed * math.sin(robot_th)
@@ -992,9 +992,9 @@ while run:
         dist_l, dist_r, dist_f = 0.0, 0.0, 0.0
         if reached:
             simple_return_mode = False
-            print("✅ Retour simple terminé (A* + PID)")
+            print("✅ Simple return finished (A* + PID)")
     elif nav2_mode:
-        # Mode NAV2: applique /cmd_vel
+        # NAV2 mode: applies /cmd_vel
         if (time.time() - nav2_last_cmd_time) > 0.8:
             cmd_linear = 0.0
             cmd_angular = 0.0
@@ -1012,7 +1012,7 @@ while run:
         warning_mode = False
         dist_l, dist_r, dist_f = 0.0, 0.0, 0.0
     else:
-        # Mode manuel (clavier)
+        # Manual mode (keyboard)
         k = pygame.key.get_pressed()
         if k[pygame.K_LEFT]:  robot_th -= MAX_ANGULAR_SPEED
         if k[pygame.K_RIGHT]: robot_th += MAX_ANGULAR_SPEED
@@ -1025,14 +1025,14 @@ while run:
         warning_mode = False
         dist_l, dist_r, dist_f = 0.0, 0.0, 0.0
 
-    # --- AFFICHAGE ---
+    # --- DISPLAY ---
     screen.blit(circuit_surf, (0,0))
     
-    # Affichage zones de détection en mode autonome
+    # Show the detection zones in autonomous mode
     if auto_mode and len(ranges) > 0:
         cx, cy = int(robot_pos[0]), int(robot_pos[1])
         
-        # Zone DEVANT (rouge)
+        # FRONT zone (red)
         for i in range(-10, 10):
             idx = i % NUM_RAYS
             r = ranges[idx]
@@ -1042,7 +1042,7 @@ while run:
                 py = int(robot_pos[1] + r*75*math.sin(angle))
                 pygame.draw.circle(screen, (255, 0, 0), (px, py), 3)
         
-        # Zone GAUCHE (vert)
+        # LEFT zone (green)
         offset_60deg = NUM_RAYS // 6
         idx_left = -offset_60deg % NUM_RAYS
         for i in range(-10, 10):
@@ -1054,7 +1054,7 @@ while run:
                 py = int(robot_pos[1] + r*75*math.sin(angle))
                 pygame.draw.circle(screen, (0, 255, 0), (px, py), 3)
         
-        # Zone DROITE (bleu)
+        # RIGHT zone (blue)
         idx_right = offset_60deg % NUM_RAYS
         for i in range(-10, 10):
             idx = (idx_right + i) % NUM_RAYS
@@ -1065,11 +1065,11 @@ while run:
                 py = int(robot_pos[1] + r*75*math.sin(angle))
                 pygame.draw.circle(screen, (0, 0, 255), (px, py), 3)
     
-    # 🎯 POINT DE DÉPART (en JAUNE)
-    pygame.draw.circle(screen, (255, 255, 0), (int(start_pos[0]), int(start_pos[1])), 12, 3)  # Cercle jaune vide
-    pygame.draw.circle(screen, (255, 255, 0), (int(start_pos[0]), int(start_pos[1])), 5)      # Point jaune plein
+    # 🎯 START POINT (in YELLOW)
+    pygame.draw.circle(screen, (255, 255, 0), (int(start_pos[0]), int(start_pos[1])), 12, 3)  # Hollow yellow circle
+    pygame.draw.circle(screen, (255, 255, 0), (int(start_pos[0]), int(start_pos[1])), 5)      # Filled yellow dot
 
-    # 🧭 Waypoints demandés à Nav2 (magenta) - visible même si planning échoue
+    # 🧭 Waypoints requested from Nav2 (magenta) - visible even if planning fails
     if nav2_mode and len(nav2_requested_waypoints_m) >= 2:
         req_points_px = []
         for px_m, py_m in nav2_requested_waypoints_m:
@@ -1082,14 +1082,14 @@ while run:
             for waypoint in req_points_px[:: max(1, len(req_points_px)//30)]:
                 pygame.draw.circle(screen, (220, 0, 220), waypoint, 2)
 
-    # 🟢 Trajectoire A* du mode SIMPLE
+    # 🟢 A* trajectory of SIMPLE mode
     if simple_return_mode and len(simple_path_px) >= 2:
         pygame.draw.lines(screen, (0, 255, 120), False, simple_path_px, 2)
         if 0 <= simple_path_idx < len(simple_path_px):
             tx, ty = simple_path_px[simple_path_idx]
             pygame.draw.circle(screen, (0, 255, 120), (int(tx), int(ty)), 5)
 
-    # 🧭 Plan Nav2 calculé (cyan)
+    # 🧭 Computed Nav2 plan (cyan)
     if nav2_mode and len(nav2_plan_points_m) >= 2:
         plan_points_px = []
         for px_m, py_m in nav2_plan_points_m:
@@ -1103,15 +1103,15 @@ while run:
             for waypoint in plan_points_px[:: max(1, len(plan_points_px)//20)]:
                 pygame.draw.circle(screen, (0, 200, 200), waypoint, 2)
     
-    # Calcul distance au départ
+    # Distance to the start
     dist_to_start = math.sqrt((robot_pos[0]-start_pos[0])**2 + (robot_pos[1]-start_pos[1])**2)
     dist_m = dist_to_start * MAP_RES
     robot_x_m = robot_pos[0] * MAP_RES
     robot_y_m = robot_pos[1] * MAP_RES
     
-    # 🔄 ARRÊT AUTOMATIQUE EN 2 PHASES
-    # 1) Détecte le retour près du départ après un tour complet
-    # 2) Continue encore EXTRA_DISTANCE_AFTER_RETURN puis stop
+    # 🔄 2-PHASE AUTOMATIC STOP
+    # 1) Detects the return near the start after a complete lap
+    # 2) Keeps going for EXTRA_DISTANCE_AFTER_RETURN, then stops
     dx_step = robot_pos[0] - last_robot_pos_for_stop[0]
     dy_step = robot_pos[1] - last_robot_pos_for_stop[1]
     step_m = math.sqrt(dx_step*dx_step + dy_step*dy_step) * MAP_RES
@@ -1129,7 +1129,7 @@ while run:
             lap_points_m.clear()
             lap_start_point_m = (robot_x_m, robot_y_m)
             last_lap_sample_pos_m = None
-            print("📝 Début enregistrement trajectoire du tour")
+            print("📝 Started recording the lap trajectory")
 
         if lap_recording_started and (not lap_recording_done):
             if (last_lap_sample_pos_m is None) or distance_m(robot_x_m, robot_y_m, last_lap_sample_pos_m[0], last_lap_sample_pos_m[1]) >= LAP_SAMPLE_DISTANCE:
@@ -1140,17 +1140,17 @@ while run:
             loop_return_detected = True
             extra_distance_after_return = 0.0
             lap_recording_done = True
-            print(f"\n🎯 RETOUR AU DÉPART DÉTECTÉ! Distance: {dist_m:.2f}m (max atteint: {max_distance_reached:.2f}m)")
-            print(f"🧭 Trajectoire 1er tour capturée: {len(lap_points_m)} points")
-            print(f"➡️  Continue encore {EXTRA_DISTANCE_AFTER_RETURN:.2f}m pour compléter la carte...")
+            print(f"\n🎯 RETURN TO START DETECTED! Distance: {dist_m:.2f}m (max reached: {max_distance_reached:.2f}m)")
+            print(f"🧭 First-lap trajectory captured: {len(lap_points_m)} points")
+            print(f"➡️  Driving {EXTRA_DISTANCE_AFTER_RETURN:.2f}m more to complete the map...")
         elif loop_return_detected:
             extra_distance_after_return += step_m
             if extra_distance_after_return >= EXTRA_DISTANCE_AFTER_RETURN:
                 print(
-                    f"✅ DISTANCE SUPPLÉMENTAIRE ATTEINTE: {extra_distance_after_return:.2f}m "
-                    f"(objectif {EXTRA_DISTANCE_AFTER_RETURN:.2f}m)"
+                    f"✅ EXTRA DISTANCE REACHED: {extra_distance_after_return:.2f}m "
+                    f"(target {EXTRA_DISTANCE_AFTER_RETURN:.2f}m)"
                 )
-                print("🧭 Fin mapping: passage en retour planifié")
+                print("🧭 Mapping finished: switching to the planned return")
                 auto_mode = False
                 nav2_mode = False
                 simple_return_mode = False
@@ -1164,12 +1164,12 @@ while run:
                     if len(simple_path_px) > 1:
                         simple_return_mode = True
                         simple_status = f"LOOP_OK {len(simple_path_px)} pts"
-                        print(f"🧭 Mode SIMPLE activé: tour complet optimisé ({len(simple_path_px)} points)")
+                        print(f"🧭 SIMPLE mode enabled: optimised full lap ({len(simple_path_px)} points)")
                     else:
                         if SIMPLE_REQUIRE_FULL_LOOP and (not SIMPLE_ALLOW_ASTAR_FALLBACK):
                             simple_status = "LOOP_REQUIRED"
-                            print("❌ Mode SIMPLE: boucle complète indisponible (fallback A* désactivé)")
-                            print("➡️  Continue l'enregistrement un peu plus longtemps avant la bascule")
+                            print("❌ SIMPLE mode: full loop unavailable (A* fallback disabled)")
+                            print("➡️  Recording a little longer before switching")
                         else:
                             simple_path_px = plan_astar_path_px((robot_pos[0], robot_pos[1]), (start_pos[0], start_pos[1]))
                             simple_path_idx = 0
@@ -1177,10 +1177,10 @@ while run:
                             if len(simple_path_px) > 1:
                                 simple_return_mode = True
                                 simple_status = f"ASTAR_OK {len(simple_path_px)} pts"
-                                print(f"⚠️ Boucle indisponible, fallback A* ({len(simple_path_px)} points)")
+                                print(f"⚠️ Loop unavailable, A* fallback ({len(simple_path_px)} points)")
                             else:
                                 simple_status = "PATH_FAIL"
-                                print("❌ Mode SIMPLE: aucun chemin, fallback Nav2")
+                                print("❌ SIMPLE mode: no path, Nav2 fallback")
                                 nav2_mode = True
                 else:
                     nav2_mode = True
@@ -1189,7 +1189,7 @@ while run:
                 nav2_requested_waypoints_m = list(nav2_route_goals_m)
                 nav2_route_goal_idx = 0
                 if nav2_mode and len(nav2_route_goals_m) > 0:
-                    print(f"🧭 Route séquentielle préparée: {len(nav2_route_goals_m)} goals NavigateToPose")
+                    print(f"🧭 Sequential route prepared: {len(nav2_route_goals_m)} NavigateToPose goals")
                     nav2_goal_pending = True
                 else:
                     nav2_goal_pending = False
@@ -1199,19 +1199,19 @@ while run:
         if nav2_status == 'GOAL_SUCCEEDED':
             nav2_route_goal_idx += 1
             if nav2_route_goal_idx < len(nav2_route_goals_m):
-                print(f"✅ Goal {nav2_route_goal_idx}/{len(nav2_route_goals_m)} atteint, envoi suivant")
+                print(f"✅ Goal {nav2_route_goal_idx}/{len(nav2_route_goals_m)} reached, sending the next one")
                 nav2_goal_pending = True
                 nav2_goal_last_try = 0.0
             else:
-                print("✅ Route séquentielle terminée, retour départ accompli")
+                print("✅ Sequential route finished, back at the start")
         elif nav2_status in ('GOAL_ABORTED', 'GOAL_REJECTED', 'GOAL_CANCELED'):
             nav2_route_goal_idx += 1
             if nav2_route_goal_idx < len(nav2_route_goals_m):
-                print(f"⚠️ Goal échoué ({nav2_status}), on passe au suivant {nav2_route_goal_idx + 1}/{len(nav2_route_goals_m)}")
+                print(f"⚠️ Goal failed ({nav2_status}), moving on to the next one {nav2_route_goal_idx + 1}/{len(nav2_route_goals_m)}")
                 nav2_goal_pending = True
                 nav2_goal_last_try = 0.0
             else:
-                print(f"❌ Route séquentielle interrompue: {nav2_status}")
+                print(f"❌ Sequential route interrupted: {nav2_status}")
 
     if nav2_mode and slam_freeze_requested and nav2_interface is not None:
         nav2_interface.publish_frozen_map_to_odom_transform()
@@ -1223,13 +1223,13 @@ while run:
             if nav2_route_goal_idx < len(nav2_route_goals_m):
                 gx, gy = nav2_route_goals_m[nav2_route_goal_idx]
                 if nav2_interface.send_goal_to_start(gx, gy, 0.0):
-                    print(f"🧭 NavigateToPose envoyé [{nav2_route_goal_idx + 1}/{len(nav2_route_goals_m)}] x={gx:.2f} y={gy:.2f}")
+                    print(f"🧭 NavigateToPose sent [{nav2_route_goal_idx + 1}/{len(nav2_route_goals_m)}] x={gx:.2f} y={gy:.2f}")
                     nav2_goal_pending = False
     
-    # Robot (bleu)
+    # Robot (blue)
     pygame.draw.circle(screen, (0,0,255), (int(robot_pos[0]), int(robot_pos[1])), 10)
     
-    # Trait rouge devant
+    # Red line at the front
     front_x = int(robot_pos[0] + 15 * math.cos(robot_th))
     front_y = int(robot_pos[1] + 15 * math.sin(robot_th))
     pygame.draw.line(screen, (255,0,0), (int(robot_pos[0]), int(robot_pos[1])), (front_x, front_y), 3)
@@ -1239,7 +1239,7 @@ while run:
     
     pygame.display.flip()
 
-    # --- ENVOI SOCKET ---
+    # --- SOCKET SEND ---
     if lidar_conn:
         try:
             q = angle_to_quaternion(robot_th)

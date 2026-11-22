@@ -4,14 +4,14 @@ from launch.actions import LogInfo
 
 def generate_launch_description():
     """
-    Launch file pour démarrer les nodes LIDAR
+    Launch file that starts the LIDAR nodes
     Publisher: talker (LIDAR simulator)
     Subscriber: listener (LIDAR data processor)
     """
     
     return LaunchDescription([
-        # Log de démarrage
-        LogInfo(msg="🚀 Démarrage des nodes LIDAR..."),
+        # Startup log
+        LogInfo(msg="🚀 Starting the LIDAR nodes..."),
         
         # Node Publisher (LIDAR Publisher)
         Node(
@@ -29,5 +29,5 @@ def generate_launch_description():
             output='screen',
         ),
         
-        LogInfo(msg="✅ Nodes LIDAR lancés - Topics: /scan, /data"),
+        LogInfo(msg="✅ LIDAR nodes started - Topics: /scan, /data"),
     ])

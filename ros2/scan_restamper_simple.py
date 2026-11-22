@@ -22,7 +22,7 @@ class ScanRestamper(Node):
         
         self.scan_count = 0
         self.last_published_count = 0
-        self.publish_interval = 4  # Publier 1 scan sur 4 (throttle maximal)
+        self.publish_interval = 4  # Publish 1 scan out of 4 (maximum throttle)
         
         # Subscribe to ESP32 /scan_raw in BEST_EFFORT
         scan_raw_qos = QoSProfile(
@@ -79,7 +79,7 @@ class ScanRestamper(Node):
 
         self.scan_count += 1
         
-        # Throttle: publier juste 1 scan sur 2
+        # Throttle: publish only 1 scan out of 2
         if self.scan_count % self.publish_interval != 0:
             return
         

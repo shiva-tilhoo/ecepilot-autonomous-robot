@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-RETURN PATH GENERATOR - Génère le chemin de retour via A* sur la vraie map SLAM
+RETURN PATH GENERATOR - Generates the return path with A* on the real SLAM map
 
-Écoute la map OccupancyGrid de SLAM Toolbox, planifie un retour optimal du robot
-à son point de départ en utilisant A* avec optimisations (raccourcis, lissage).
+Listens to the SLAM Toolbox OccupancyGrid map and plans an optimal return of the robot
+to its start point using A* with optimisations (shortcuts, smoothing).
 """
 
 import heapq
@@ -22,20 +22,20 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float32MultiArray, Bool
 from std_msgs.msg import Header
 
-# --- PARAMÈTRES A* ---
-ASTAR_CELL_SIZE_M = 0.08              # Pas de grille (m) - 8cm pour balance précision/vitesse
-ASTAR_INFLATION_CELLS = 4             # Cellules à dégonfler autour obstacles
-ASTAR_OBSTACLE_THRESHOLD = 50         # Valeur seuil pour considérer occupé (0-100)
-ASTAR_SHORTCUT_CLEARANCE_M = 0.30     # Distance de sécurité pour raccourcis
-ASTAR_SHORTCUT_MAX_SKIP = 20          # Max points à sauter pour raccourci
-ASTAR_MIN_PATH_KEEP_RATIO = 0.45      # Ratio min points à conserver après optim
-ASTAR_ALLOW_DIAGONAL = True           # Mouvements diagonaux autorisés
+# --- A* PARAMETERS ---
+ASTAR_CELL_SIZE_M = 0.08              # Grid step (m) - 8cm to balance accuracy and speed
+ASTAR_INFLATION_CELLS = 4             # Inflation cells around obstacles
+ASTAR_OBSTACLE_THRESHOLD = 50         # Threshold above which a cell is occupied (0-100)
+ASTAR_SHORTCUT_CLEARANCE_M = 0.30     # Safety distance for shortcuts
+ASTAR_SHORTCUT_MAX_SKIP = 20          # Max points skipped by a shortcut
+ASTAR_MIN_PATH_KEEP_RATIO = 0.45      # Min ratio of points kept after optimisation
+ASTAR_ALLOW_DIAGONAL = True           # Diagonal moves allowed
 ASTAR_LOOKUP_TIMEOUT = 2.0            # Timeout lookup TF2
 
 
 @dataclass
 class GridPoint:
-    """Point dans la grille A*"""
+    """Point of the A* grid"""
     x: int
     y: int
     
@@ -56,17 +56,17 @@ class ReturnPathGenerator(Node):
         
         # Map SLAM
         self.current_map = None
-        self.map_resolution = 0.05  # Default, sera mis à jour
+        self.map_resolution = 0.05  # Default, updated later
         self.map_origin_x = 0.0
         self.map_origin_y = 0.0
         self.map_width = 0
         self.map_height = 0
         
-        # Pose de départ (sera définie par le détecteur)
+        # Start pose (set by the detector)
         self.start_pose_x_m = None
         self.start_pose_y_m = None
         
-        # Chemin calculé
+        # Computed path
         self.planned_path_m = []
         self.planned_path_waypoints = []
         
@@ -81,10 +81,10 @@ class ReturnPathGenerator(Node):
         self.pub_planned_path = self.create_publisher(PathMsg, '/return_path', 10)
         self.pub_waypoints = self.create_publisher(Float32MultiArray, '/return_waypoints', 10)
         
-        self.get_logger().info("🗺️  Return Path Generator démarré")
+        self.get_logger().info("🗺️  Return Path Generator started")
     
     def map_callback(self, msg):
-        """Reçoit mise à jour de la map SLAM"""
+        """Receives the SLAM map updates"""
         self.current_map = msg.data
         self.map_resolution = msg.info.resolution
         self.map_width = msg.info.width
@@ -93,35 +93,35 @@ class ReturnPathGenerator(Node):
         self.map_origin_y = msg.info.origin.position.y
     
     def trajectory_point_callback(self, msg):
-        """Reçoit points de trajectoire et recalcule si nécessaire"""
-        # L'initialisation du point de départ se fait au premiere détection
+        """Receives the trajectory points and recomputes if needed"""
+        # The start point is set on the first detection
         if self.start_pose_x_m is None:
             self.start_pose_x_m = msg.pose.position.x
             self.start_pose_y_m = msg.pose.position.y
             self.get_logger().info(
-                f"🎯 Point de départ configuré pour retour: ({self.start_pose_x_m:.2f}, {self.start_pose_y_m:.2f})"
+                f"🎯 Start point set for the return: ({self.start_pose_x_m:.2f}, {self.start_pose_y_m:.2f})"
             )
     
     def return_detected_callback(self, msg):
-        """Appelé quand le retour est détecté - lance planification"""
+        """Called when the return is detected - starts the planning"""
         if msg.data and self.current_map is not None:
-            self.get_logger().info("🔄 Planification d'un chemin de retour...")
+            self.get_logger().info("🔄 Planning a return path...")
             self.plan_return_path()
     
     def world_to_grid(self, x_m, y_m):
-        """Convertit coordonnées monde (m) en coordonnées grille (cellules)"""
+        """Converts world coordinates (m) to grid coordinates (cells)"""
         grid_x = int((x_m - self.map_origin_x) / self.map_resolution)
         grid_y = int((y_m - self.map_origin_y) / self.map_resolution)
         return grid_x, grid_y
     
     def grid_to_world(self, grid_x, grid_y):
-        """Convertit coordonnées grille en coordonnées monde"""
+        """Converts grid coordinates to world coordinates"""
         x_m = grid_x * self.map_resolution + self.map_origin_x
         y_m = grid_y * self.map_resolution + self.map_origin_y
         return x_m, y_m
     
     def is_cell_free(self, grid_x, grid_y):
-        """Vérifie si une cellule est libre (considère aussi inflation)"""
+        """Checks whether a cell is free (inflation included)"""
         if not (0 <= grid_x < self.map_width and 0 <= grid_y < self.map_height):
             return False
         
@@ -133,13 +133,13 @@ class ReturnPathGenerator(Node):
         return value >= 0 and value < ASTAR_OBSTACLE_THRESHOLD
     
     def heuristic(self, x1, y1, x2, y2):
-        """Heuristique Euclidienne pour A*"""
+        """Euclidean heuristic for A*"""
         dx = x2 - x1
         dy = y2 - y1
         return math.sqrt(dx*dx + dy*dy)
     
     def get_neighbors(self, gx, gy):
-        """Get voisins d'une cellule (4 ou 8 directions)"""
+        """Gets the neighbours of a cell (4 or 8 directions)"""
         neighbors = [
             (gx + 1, gy, 1.0),      # Right
             (gx - 1, gy, 1.0),      # Left
@@ -159,14 +159,14 @@ class ReturnPathGenerator(Node):
     
     def plan_astar(self, start_x, start_y, goal_x, goal_y):
         """
-        Implémentation A* pour trouver chemin du départ au but
-        Retourne liste [(gx, gy), ...] en coordonnées grille
+        A* implementation that finds a path from the start to the goal
+        Returns a list [(gx, gy), ...] in grid coordinates
         """
         if not self.is_cell_free(start_x, start_y):
-            self.get_logger().warn(f"⚠️ Cellule départ non libre")
+            self.get_logger().warn(f"⚠️ Start cell is not free")
             return []
         if not self.is_cell_free(goal_x, goal_y):
-            self.get_logger().warn(f"⚠️ Cellule but non libre")
+            self.get_logger().warn(f"⚠️ Goal cell is not free")
             return []
         
         open_set = []
@@ -185,7 +185,7 @@ class ReturnPathGenerator(Node):
             visited.add(current)
             
             if current == (goal_x, goal_y):
-                # Reconstruit chemin
+                # Rebuild the path
                 path = []
                 node = current
                 while node in came_from:
@@ -208,11 +208,11 @@ class ReturnPathGenerator(Node):
                     f_score[(nx, ny)] = f
                     heapq.heappush(open_set, (f, (nx, ny)))
         
-        self.get_logger().warn("❌ A* : aucun chemin trouvé")
+        self.get_logger().warn("❌ A*: no path found")
         return []
     
     def is_segment_clear(self, x1, y1, x2, y2, clearance_cells=2):
-        """Vérifie si un segment de ligne est libre d'obstacles"""
+        """Checks whether a line segment is free of obstacles"""
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
         
@@ -229,7 +229,7 @@ class ReturnPathGenerator(Node):
             px = int(x1 + t * (x2 - x1))
             py = int(y1 + t * (y2 - y1))
             
-            # Vérifier zone autour du point
+            # Check the area around the point
             for dx_c in range(-clearance_cells, clearance_cells + 1):
                 for dy_c in range(-clearance_cells, clearance_cells + 1):
                     if not self.is_cell_free(px + dx_c, py + dy_c):
@@ -238,11 +238,11 @@ class ReturnPathGenerator(Node):
         return True
     
     def optimize_path(self, path_grid):
-        """Optimise chemin avec raccourcis et lissage"""
+        """Optimises the path with shortcuts and smoothing"""
         if len(path_grid) < 3:
             return path_grid
         
-        # 1. Détection de raccourcis
+        # 1. Shortcut detection
         optimized = [path_grid[0]]
         i = 0
         
@@ -262,7 +262,7 @@ class ReturnPathGenerator(Node):
             optimized.append(path_grid[best_next])
             i = best_next
         
-        # Vérifier ratio minimum
+        # Check the minimum ratio
         raw_len = len(path_grid)
         opt_len = len(optimized)
         min_keep = max(3, int(raw_len * ASTAR_MIN_PATH_KEEP_RATIO))
@@ -270,11 +270,11 @@ class ReturnPathGenerator(Node):
         if opt_len < min_keep:
             optimized = list(path_grid)
         
-        self.get_logger().info(f"🔧 Chemin optimisé: {raw_len} → {opt_len} points")
+        self.get_logger().info(f"🔧 Optimised path: {raw_len} → {opt_len} points")
         return optimized
     
     def smooth_path(self, path_grid):
-        """Lissage du chemin avec moyenne mobile"""
+        """Smooths the path with a moving average"""
         if len(path_grid) < 3:
             return path_grid
         
@@ -293,12 +293,12 @@ class ReturnPathGenerator(Node):
         return smoothed
     
     def plan_return_path(self):
-        """Planifie le chemin complet de retour"""
+        """Plans the complete return path"""
         if self.current_map is None:
-            self.get_logger().error("❌ Pas de map disponible")
+            self.get_logger().error("❌ No map available")
             return
         
-        # Obtenir pose robot actuelle
+        # Get the current robot pose
         try:
             transform = self.tf_buffer.lookup_transform(
                 "map", "base_link", Time()
@@ -306,30 +306,30 @@ class ReturnPathGenerator(Node):
             robot_x_m = transform.transform.translation.x
             robot_y_m = transform.transform.translation.y
         except Exception as e:
-            self.get_logger().error(f"⚠️ TF lookup échoué: {e}")
+            self.get_logger().error(f"⚠️ TF lookup failed: {e}")
             return
         
-        # Convertir en coordonnées grille
+        # Convert to grid coordinates
         start_gx, start_gy = self.world_to_grid(robot_x_m, robot_y_m)
         goal_gx, goal_gy = self.world_to_grid(self.start_pose_x_m, self.start_pose_y_m)
         
         self.get_logger().info(
-            f"🧭 Plan A* de ({robot_x_m:.2f}, {robot_y_m:.2f}) "
-            f"à ({self.start_pose_x_m:.2f}, {self.start_pose_y_m:.2f})"
+            f"🧭 A* plan from ({robot_x_m:.2f}, {robot_y_m:.2f}) "
+            f"to ({self.start_pose_x_m:.2f}, {self.start_pose_y_m:.2f})"
         )
         
         # A*
         path_grid = self.plan_astar(start_gx, start_gy, goal_gx, goal_gy)
         
         if not path_grid:
-            self.get_logger().error("❌ A* n'a pas trouvé de chemin")
+            self.get_logger().error("❌ A* found no path")
             return
         
         # Optimisation
         path_grid = self.optimize_path(path_grid)
         path_grid = self.smooth_path(path_grid)
         
-        # Conversion en coordonnées monde
+        # Convert to world coordinates
         self.planned_path_m = [
             self.grid_to_world(gx, gy) for gx, gy in path_grid
         ]
@@ -337,10 +337,10 @@ class ReturnPathGenerator(Node):
         # Publication
         self.pub_planned_path.publish(self.path_to_ros_msg())
         
-        self.get_logger().info(f"✅ Chemin de retour planifié: {len(self.planned_path_m)} points")
+        self.get_logger().info(f"✅ Return path planned: {len(self.planned_path_m)} points")
     
     def path_to_ros_msg(self):
-        """Convertit path en message ROS Path"""
+        """Converts the path to a ROS Path message"""
         msg = PathMsg()
         msg.header = Header()
         msg.header.frame_id = "map"

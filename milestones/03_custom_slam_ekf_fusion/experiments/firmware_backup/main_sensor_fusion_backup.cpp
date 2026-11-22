@@ -98,7 +98,7 @@ static HardwareSerial LIDAR_SERIAL(2);
 // Pre-allocated buffers (NO malloc in loop!)
 static float lidar_ranges[360];
 
-// IMU avec Kalman simplifié
+// IMU with a simplified Kalman filter
 static uint32_t last_imu_read = 0;
 
 // Kalman simple
@@ -284,7 +284,7 @@ void imuTask(void *param) {
       int16_t ax, ay, az, gx, gy, gz;
       mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
       
-      // Debug: affiche les valeurs brutes toutes les 100 lectures
+      // Debug: print the raw values every 100 readings
       if(debug_count++ % 100 == 0) {
         Serial.printf("[IMU RAW] ax=%d ay=%d az=%d gx=%d gy=%d gz=%d\n", ax, ay, az, gx, gy, gz);
       }

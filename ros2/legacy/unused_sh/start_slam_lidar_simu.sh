@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- Nettoyage radical ---
+# --- Thorough cleanup ---
 echo "Cleaning up..."
 pkill -9 rf2o 2>/dev/null || true
 pkill -9 slam_toolbox 2>/dev/null || true
@@ -10,7 +10,7 @@ pkill -9 simu_lidar 2>/dev/null || true
 pkill -9 simu_bridge 2>/dev/null || true
 sleep 2
 
-# --- Lancement ---
+# --- Start-up ---
 
 echo "Launching SLAM with LIDAR simulation..."
 python3 simu_lidar.py &
@@ -49,5 +49,5 @@ echo "========================================="
 echo ""
 echo "Press Ctrl+C to stop"
 
-# Attendre les processus
+# Wait for the processes
 wait

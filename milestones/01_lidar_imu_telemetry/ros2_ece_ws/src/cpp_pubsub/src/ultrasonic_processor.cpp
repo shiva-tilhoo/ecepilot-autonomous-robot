@@ -25,9 +25,9 @@ private:
   {
     std_msgs::msg::String cmd;
     if (msg->data < 1.65) {
-      cmd.data = "gauche";
+      cmd.data = "left";
     } else {
-      cmd.data = "droite";
+      cmd.data = "right";
     }
     pub_->publish(cmd);
     RCLCPP_INFO(

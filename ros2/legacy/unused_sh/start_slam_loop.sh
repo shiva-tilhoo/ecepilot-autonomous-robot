@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stack avec loop closure: corrige le drift au retour
+# Stack with loop closure: corrects the drift on the return
 
 echo "🧹 Cleaning up..."
 pkill -9 simu_lidar 2>/dev/null || true
@@ -12,7 +12,7 @@ sleep 2
 
 echo ""
 echo "==========================================="
-echo "🚀 RF2O + SLAM avec LOOP CLOSURE"
+echo "🚀 RF2O + SLAM with LOOP CLOSURE"
 echo "==========================================="
 echo ""
 
@@ -46,13 +46,13 @@ sleep 1
 
 echo ""
 echo "==========================================="
-echo "✅ STACK RUNNING avec LOOP CLOSURE! 🔄"
+echo "✅ STACK RUNNING with LOOP CLOSURE! 🔄"
 echo "==========================================="
 echo ""
-echo "Quand vous revenez au point de départ:"
-echo "  → SLAM détectera la boucle fermée"
-echo "  → Toute la trajectoire sera corrigée"
-echo "  → Drift éliminé!"
+echo "When you come back to the start point:"
+echo "  → SLAM will detect the closed loop"
+echo "  → The whole trajectory will be corrected"
+echo "  → Drift removed!"
 echo ""
 echo "Compare: python3 compare_rf2o_vs_slam.py"
 echo "Control: python3 teleop_keyboard.py"

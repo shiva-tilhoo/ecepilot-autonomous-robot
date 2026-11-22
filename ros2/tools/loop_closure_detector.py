@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-LOOP CLOSURE DETECTOR - Détecte quand le robot revient au point de départ
+LOOP CLOSURE DETECTOR - Detects when the robot comes back to its start point
 
-Écoute la pose du robot via TF2 et compare la distance avec le point de départ.
-Émet un signal quand la boucle est complétée.
+Listens to the robot pose through TF2 and compares its distance to the start point.
+Emits a signal when the loop is complete.
 
-Paramètres clés:
-- RETURN_DETECTION_DISTANCE: Seuil de distance pour détecter retour au départ
-- MIN_DISTANCE_TRAVELED: Distance minimale avant de permettre la détection
-- LEAVE_START_DISTANCE: Distance minimale avant de quitter la zone de départ
-- LAP_SAMPLE_DISTANCE: Intervalle d'échantillonnage de la trajectoire
+Key parameters:
+- RETURN_DETECTION_DISTANCE: distance threshold to detect the return to the start
+- MIN_DISTANCE_TRAVELED: minimum distance before detection is allowed
+- LEAVE_START_DISTANCE: minimum distance to leave the start area
+- LAP_SAMPLE_DISTANCE: sampling interval of the trajectory
 """
 
 import os
@@ -27,12 +27,12 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool, Float32
 from std_srvs.srv import Empty
 
-# --- PARAMÈTRES LOOP CLOSURE ---
-RETURN_DETECTION_DISTANCE = 0.20      # Distance tolérance (m) pour détecter retour
-MIN_DISTANCE_TRAVELED = 3.0           # Distance min avant de permettre détection (m)
-LEAVE_START_DISTANCE = 0.60           # Distance pour quitter zone départ (m)
-EXTRA_DISTANCE_AFTER_RETURN = 2.0     # Distance à parcourir APRÈS retour (m)
-LAP_SAMPLE_DISTANCE = 0.08            # Intervalle échantillonnage trajectoire (m)
+# --- LOOP CLOSURE PARAMETERS ---
+RETURN_DETECTION_DISTANCE = 0.20      # Tolerance distance (m) to detect the return
+MIN_DISTANCE_TRAVELED = 3.0           # Min distance before detection is allowed (m)
+LEAVE_START_DISTANCE = 0.60           # Distance to leave the start area (m)
+EXTRA_DISTANCE_AFTER_RETURN = 2.0     # Distance to drive AFTER the return (m)
+LAP_SAMPLE_DISTANCE = 0.08            # Trajectory sampling interval (m)
 SLAM_MAP_FRAME = "map"
 ROBOT_FRAME = "base_link"
 
@@ -45,7 +45,7 @@ class LoopClosureDetector(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
-        # État loop closure
+        # Loop closure state
         self.start_pose_x = None
         self.start_pose_y = None
         self.max_distance_reached = 0.0
@@ -55,7 +55,7 @@ class LoopClosureDetector(Node):
         self.last_robot_pos = None
         self.last_lap_sample_pos = None
         
-        # Trajectoire enregistrée
+        # Recorded trajectory
         self.lap_points_m = []
         self.lap_recording_started = False
         self.lap_recording_done = False
@@ -65,15 +65,15 @@ class LoopClosureDetector(Node):
         self.pub_distance_to_start = self.create_publisher(Float32, '/loop_closure/distance_to_start', 10)
         self.pub_trajectory = self.create_publisher(PoseStamped, '/loop_closure/trajectory_point', 10)
         
-        # Timer pour vérifier la pose régulièrement
+        # Timer that checks the pose regularly
         self.create_timer(0.1, self.timer_callback)
         
-        self.get_logger().info("🔍 Loop Closure Detector démarré")
+        self.get_logger().info("🔍 Loop Closure Detector started")
     
     def get_robot_pose_in_map(self):
         """
-        Récupère la pose du robot dans le frame map via TF2
-        Retourne: (x_m, y_m, theta_rad) ou None si TF non disponible
+        Gets the robot pose in the map frame through TF2
+        Returns: (x_m, y_m, theta_rad), or None when the TF is not available
         """
         try:
             transform = self.tf_buffer.lookup_transform(
@@ -85,7 +85,7 @@ class LoopClosureDetector(Node):
             x = transform.transform.translation.x
             y = transform.transform.translation.y
             
-            # Extraire angle theta du quaternion
+            # Extract the theta angle from the quaternion
             q = transform.transform.rotation
             theta = math.atan2(
                 2 * (q.w * q.z + q.x * q.y),
@@ -97,27 +97,27 @@ class LoopClosureDetector(Node):
             return None
     
     def distance_m(self, x1_m, y1_m, x2_m, y2_m):
-        """Calcule distance euclidienne en mètres"""
+        """Computes the Euclidean distance in metres"""
         dx = x2_m - x1_m
         dy = y2_m - y1_m
         return math.sqrt(dx*dx + dy*dy)
     
     def timer_callback(self):
-        """Vérification périodique (100ms) de la pose et détection de boucle"""
+        """Periodic (100ms) pose check and loop detection"""
         
-        # Récupérer pose robot
+        # Get the robot pose
         pose = self.get_robot_pose_in_map()
         if pose is None:
             return
         
         robot_x_m, robot_y_m, robot_theta = pose
         
-        # Initialiser point de départ lors du premier appel
+        # Set the start point on the first call
         if self.start_pose_x is None:
             self.start_pose_x = robot_x_m
             self.start_pose_y = robot_y_m
             self.last_robot_pos = (robot_x_m, robot_y_m)
-            self.get_logger().info(f"📍 Point de départ configuré: ({robot_x_m:.2f}, {robot_y_m:.2f})")
+            self.get_logger().info(f"📍 Start point set: ({robot_x_m:.2f}, {robot_y_m:.2f})")
             return
         
         # Distances
@@ -126,38 +126,38 @@ class LoopClosureDetector(Node):
             self.start_pose_x, self.start_pose_y
         )
         
-        # Publier distance au départ
+        # Publish the distance to the start
         dist_msg = Float32()
         dist_msg.data = dist_to_start
         self.pub_distance_to_start.publish(dist_msg)
         
-        # Calcul distance parcourue depuis dernière pose
+        # Distance travelled since the last pose
         dx = robot_x_m - self.last_robot_pos[0]
         dy = robot_y_m - self.last_robot_pos[1]
         step_m = math.sqrt(dx*dx + dy*dy)
         self.last_robot_pos = (robot_x_m, robot_y_m)
         
-        # Mettre à jour distance max atteinte
+        # Update the max distance reached
         if dist_to_start > self.max_distance_reached:
             self.max_distance_reached = dist_to_start
         
-        # === LOGIQUE ENREGISTREMENT & DÉTECTION ===
+        # === RECORDING & DETECTION LOGIC ===
         
-        # Phase 1: Zone de départ - attend que robot s'éloigne
+        # Phase 1: start area - wait for the robot to move away
         if not self.has_left_start_zone and dist_to_start > LEAVE_START_DISTANCE:
             self.has_left_start_zone = True
-            self.get_logger().info("✅ Robot a quitté zone de départ, commence enregistrement")
+            self.get_logger().info("✅ Robot left the start area, recording starts")
         
-        # Phase 2: Début enregistrement trajectoire
+        # Phase 2: start recording the trajectory
         if self.has_left_start_zone and not self.lap_recording_started:
             self.lap_recording_started = True
             self.lap_points_m.clear()
             self.last_lap_sample_pos = None
-            self.get_logger().info("📝 Début enregistrement trajectoire du tour")
+            self.get_logger().info("📝 Started recording the lap trajectory")
         
-        # Phase 3: Échantillonnage trajectoire
+        # Phase 3: trajectory sampling
         if self.lap_recording_started and not self.lap_recording_done:
-            # Sample tous les LAP_SAMPLE_DISTANCE mètres
+            # Sample every LAP_SAMPLE_DISTANCE metres
             if (self.last_lap_sample_pos is None or 
                 self.distance_m(
                     robot_x_m, robot_y_m,
@@ -167,7 +167,7 @@ class LoopClosureDetector(Node):
                 self.lap_points_m.append((robot_x_m, robot_y_m))
                 self.last_lap_sample_pos = (robot_x_m, robot_y_m)
                 
-                # Publier le point
+                # Publish the point
                 msg = PoseStamped()
                 msg.header.frame_id = SLAM_MAP_FRAME
                 msg.header.stamp = self.get_clock().now().to_msg()
@@ -176,7 +176,7 @@ class LoopClosureDetector(Node):
                 msg.pose.position.z = 0.0
                 self.pub_trajectory.publish(msg)
         
-        # Phase 4: Détection du retour au départ
+        # Phase 4: detect the return to the start
         if (not self.loop_return_detected and 
             self.has_left_start_zone and 
             self.max_distance_reached > MIN_DISTANCE_TRAVELED and 
@@ -186,38 +186,38 @@ class LoopClosureDetector(Node):
             self.extra_distance_after_return = 0.0
             self.lap_recording_done = True
             
-            self.get_logger().info(f"\n🎯 RETOUR AU DÉPART DÉTECTÉ!")
+            self.get_logger().info(f"\n🎯 RETURN TO START DETECTED!")
             self.get_logger().info(f"   Distance: {dist_to_start:.2f}m")
-            self.get_logger().info(f"   Max atteint: {self.max_distance_reached:.2f}m")
-            self.get_logger().info(f"   Trajectoire capturée: {len(self.lap_points_m)} points")
-            self.get_logger().info(f"➡️  Continuant {EXTRA_DISTANCE_AFTER_RETURN:.2f}m pour compléter la carte...")
+            self.get_logger().info(f"   Max reached: {self.max_distance_reached:.2f}m")
+            self.get_logger().info(f"   Trajectory captured: {len(self.lap_points_m)} points")
+            self.get_logger().info(f"➡️  Driving {EXTRA_DISTANCE_AFTER_RETURN:.2f}m more to complete the map...")
             
-            # Publier signal de détection
+            # Publish the detection signal
             ret_msg = Bool()
             ret_msg.data = True
             self.pub_return_detected.publish(ret_msg)
         
-        # Phase 5: Enregistrement distance après retour
+        # Phase 5: record the distance after the return
         elif self.loop_return_detected:
             self.extra_distance_after_return += step_m
             
             if self.extra_distance_after_return >= EXTRA_DISTANCE_AFTER_RETURN:
-                self.get_logger().info(f"✅ DISTANCE SUPPLÉMENTAIRE ATTEINTE: {self.extra_distance_after_return:.2f}m")
-                self.get_logger().info("🧭 Fin mapping automatique")
+                self.get_logger().info(f"✅ EXTRA DISTANCE REACHED: {self.extra_distance_after_return:.2f}m")
+                self.get_logger().info("🧭 Automatic mapping finished")
                 self.save_trajectory()
     
     def save_trajectory(self):
-        """Sauvegarde la trajectoire enregistrée dans un fichier"""
+        """Saves the recorded trajectory to a file"""
         if not self.lap_points_m:
-            self.get_logger().warn("⚠️ Aucun point de trajectoire à sauvegarder")
+            self.get_logger().warn("⚠️ No trajectory point to save")
             return
         
         try:
-            # Créer dossier trajectories s'il n'existe pas
+            # Create the trajectories folder if it does not exist
             traj_dir = Path(os.path.dirname(__file__)) / "trajectories"
             traj_dir.mkdir(exist_ok=True)
             
-            # Sauvegarder en JSON
+            # Save as JSON
             timestamp = int(time.time())
             traj_file = traj_dir / f"lap_trajectory_{timestamp}.json"
             
@@ -232,16 +232,16 @@ class LoopClosureDetector(Node):
             with open(traj_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
-            self.get_logger().info(f"💾 Trajectoire sauvegardée: {traj_file}")
+            self.get_logger().info(f"💾 Trajectory saved: {traj_file}")
             
-            # Aussi sauvegarder en numpy pour accès rapide
+            # Also save as numpy for fast access
             import numpy as np
             npy_file = traj_dir / f"lap_trajectory_{timestamp}.npy"
             np.save(npy_file, np.array(self.lap_points_m))
             self.get_logger().info(f"💾 Format NPY: {npy_file}")
             
         except Exception as e:
-            self.get_logger().error(f"❌ Erreur sauvegarde trajectoire: {e}")
+            self.get_logger().error(f"❌ Trajectory save error: {e}")
 
 
 def main(args=None):

@@ -177,9 +177,9 @@ M_SCTR  →     GPIO25 (PWM)
 
 ### Serial Logs
 ```
-[LIDAR] Tâche démarrée sur cœur 1
+[LIDAR] Task started on core 1
 [OK] ROS Entities created!
-[WiFi] IP locale: 192.168.x.x
+[WiFi] OK 192.168.x.x
 [STATE] CONNECTED!
 [LIDAR PUBLISH OK] Distance: 320mm, Angle: 45°, Conf: 200
 ```

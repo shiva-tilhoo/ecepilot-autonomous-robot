@@ -11,30 +11,30 @@ using PointCloud2 = sensor_msgs::msg::PointCloud2;
 class LidarBufferNode : public rclcpp::Node {
 public:
     LidarBufferNode() : Node("lidar_buffer") {
-        // Paramètres
+        // Parameters
         this->declare_parameter("buffer_size", 50);
         buffer_size_ = this->get_parameter("buffer_size").as_int();
         
-        // Subscribers et Publishers
+        // Subscribers and publishers
         sub_ = this->create_subscription<LaserScan>(
             "/scan", 10,
             std::bind(&LidarBufferNode::scan_callback, this, std::placeholders::_1));
         
         pub_ = this->create_publisher<PointCloud2>("/scan_cloud", 10);
         
-        RCLCPP_INFO(this->get_logger(), "🔄 Buffer LIDAR démarré (buffer_size=%d)", buffer_size_);
+        RCLCPP_INFO(this->get_logger(), "🔄 LIDAR buffer started (buffer_size=%d)", buffer_size_);
     }
 
 private:
     void scan_callback(const LaserScan::SharedPtr msg) {
-        // Convertir le scan LaserScan en PointCloud2
+        // Convert the LaserScan into a PointCloud2
         auto cloud = std::make_shared<PointCloud2>();
         cloud->header.frame_id = "lidar_link";
         cloud->header.stamp = msg->header.stamp;
         cloud->height = 1;
         cloud->is_dense = true;
         
-        // Ajouter les champs (x, y, z, intensity)
+        // Add the fields (x, y, z, intensity)
         sensor_msgs::PointCloud2Modifier modifier(*cloud);
         modifier.setPointCloud2Fields(4,
             "x", 1, sensor_msgs::msg::PointField::FLOAT32,
@@ -42,7 +42,7 @@ private:
             "z", 1, sensor_msgs::msg::PointField::FLOAT32,
             "intensity", 1, sensor_msgs::msg::PointField::FLOAT32);
         
-        // Compter les points valides
+        // Count the valid points
         int valid_count = 0;
         for (const auto& range : msg->ranges) {
             if (!std::isnan(range) && !std::isinf(range) && 
@@ -53,7 +53,7 @@ private:
         
         modifier.resize(valid_count);
         
-        // Remplir le cloud avec les points valides
+        // Fill the cloud with the valid points
         sensor_msgs::PointCloud2Iterator<float> iter_x(*cloud, "x");
         sensor_msgs::PointCloud2Iterator<float> iter_y(*cloud, "y");
         sensor_msgs::PointCloud2Iterator<float> iter_z(*cloud, "z");
@@ -78,33 +78,33 @@ private:
             ++iter_intensity;
         }
         
-        // Ajouter au buffer
+        // Add to the buffer
         buffer_.push_back(cloud);
         if (buffer_.size() > static_cast<size_t>(buffer_size_)) {
             buffer_.pop_front();
         }
         
-        // Publier le cloud accumulé
+        // Publish the accumulated cloud
         publish_accumulated_cloud();
     }
     
     void publish_accumulated_cloud() {
         if (buffer_.empty()) return;
         
-        // Créer un cloud avec tous les points du buffer
+        // Build a cloud with every point of the buffer
         auto combined_cloud = std::make_shared<PointCloud2>();
         combined_cloud->header.frame_id = "lidar_link";
         combined_cloud->header.stamp = this->now();
         combined_cloud->height = 1;
         combined_cloud->is_dense = true;
         
-        // Compter le total de points
+        // Count the total number of points
         size_t total_points = 0;
         for (const auto& cloud : buffer_) {
             total_points += cloud->width;
         }
         
-        // Configurer les champs
+        // Set up the fields
         sensor_msgs::PointCloud2Modifier modifier(*combined_cloud);
         modifier.setPointCloud2Fields(4,
             "x", 1, sensor_msgs::msg::PointField::FLOAT32,
@@ -113,7 +113,7 @@ private:
             "intensity", 1, sensor_msgs::msg::PointField::FLOAT32);
         modifier.resize(total_points);
         
-        // Copier tous les points
+        // Copy every point
         sensor_msgs::PointCloud2Iterator<float> iter_x(*combined_cloud, "x");
         sensor_msgs::PointCloud2Iterator<float> iter_y(*combined_cloud, "y");
         sensor_msgs::PointCloud2Iterator<float> iter_z(*combined_cloud, "z");

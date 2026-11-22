@@ -5,13 +5,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."  # root of the ROS 2 stack (ros2/)
 # With FastRTPS SHM disabled (UDP only)
 # ========================================
 
-# Configuration pour désactiver SHM
+# Configuration that disables SHM
 export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/fastrtps.xml
 export ROS_DOMAIN_ID=0
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
 echo "=========================================="
-echo "🚀 Lancement du Stack RF2O + LIDAR"
+echo "🚀 Starting the RF2O + LIDAR stack"
 echo "=========================================="
 echo "FastRTPS config: UDP only (SHM disabled)"
 echo ""
@@ -64,7 +64,7 @@ for i in {1..10}; do
   sleep 1
 done
 
-# 5. RF2O (APRÈS que les scans circulent)
+# 5. RF2O (AFTER the scans are flowing)
 echo "5️⃣  RF2O Odometry"
 ros2 run rf2o_laser_odometry rf2o_laser_odometry_node \
   --ros-args \

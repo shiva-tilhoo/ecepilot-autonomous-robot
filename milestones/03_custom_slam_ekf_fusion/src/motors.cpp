@@ -1,5 +1,5 @@
 // ============================================================
-// Contrôle moteurs - Implémentation
+// Motor control - Implementation
 // ============================================================
 
 #include "motors.h"
@@ -11,13 +11,13 @@ void motors_init() {
     Serial.println("[MOTORS] Init start");
     delay(100);  // Safety delay
     
-    // Configuration des pins moteur gauche
+    // Left motor pin configuration
     pinMode(MOTOR_LEFT_DIR1, OUTPUT);
     pinMode(MOTOR_LEFT_DIR2, OUTPUT);
     digitalWrite(MOTOR_LEFT_DIR1, LOW);
     digitalWrite(MOTOR_LEFT_DIR2, LOW);
     
-    // Configuration des pins moteur droit
+    // Right motor pin configuration
     pinMode(MOTOR_RIGHT_DIR1, OUTPUT);
     pinMode(MOTOR_RIGHT_DIR2, OUTPUT);
     digitalWrite(MOTOR_RIGHT_DIR1, LOW);
@@ -41,24 +41,24 @@ void motors_init() {
 }
 
 void motor_left(int speed) {
-    // Limite la vitesse (MIN_PWM pour éviter stall)
-    const int MIN_PWM = MAX_SPEED / 5;  // 51 (20% de 255)
+    // Clamp the speed (MIN_PWM to avoid stalling)
+    const int MIN_PWM = MAX_SPEED / 5;  // 51 (20% of 255)
     
     if (speed > 0) {
-        // Avant - Selon doc: AIN1=LOW, AIN2=HIGH
+        // Forward - per the datasheet: AIN1=LOW, AIN2=HIGH
         digitalWrite(MOTOR_LEFT_DIR1, LOW);
         digitalWrite(MOTOR_LEFT_DIR2, HIGH);
-        // Appliquer PWM minimum pour éviter stall
+        // Apply the minimum PWM to avoid stalling
         int pwm = constrain(abs(speed), MIN_PWM, MAX_SPEED);
         ledcWrite(PWM_CHANNEL_LEFT, pwm);
     } else if (speed < 0) {
-        // Arrière - Selon doc: AIN1=HIGH, AIN2=LOW
+        // Backward - per the datasheet: AIN1=HIGH, AIN2=LOW
         digitalWrite(MOTOR_LEFT_DIR1, HIGH);
         digitalWrite(MOTOR_LEFT_DIR2, LOW);
         int pwm = constrain(abs(speed), MIN_PWM, MAX_SPEED);
         ledcWrite(PWM_CHANNEL_LEFT, pwm);
     } else {
-        // Arrêt
+        // Stop
         digitalWrite(MOTOR_LEFT_DIR1, LOW);
         digitalWrite(MOTOR_LEFT_DIR2, LOW);
         ledcWrite(PWM_CHANNEL_LEFT, 0);
@@ -66,23 +66,23 @@ void motor_left(int speed) {
 }
 
 void motor_right(int speed) {
-    // Limite la vitesse (MIN_PWM pour éviter stall)
-    const int MIN_PWM = MAX_SPEED / 5;  // 51 (20% de 255)
+    // Clamp the speed (MIN_PWM to avoid stalling)
+    const int MIN_PWM = MAX_SPEED / 5;  // 51 (20% of 255)
     
     if (speed > 0) {
-        // Avant - Selon doc: BIN1=LOW, BIN2=HIGH
+        // Forward - per the datasheet: BIN1=LOW, BIN2=HIGH
         digitalWrite(MOTOR_RIGHT_DIR1, LOW);
         digitalWrite(MOTOR_RIGHT_DIR2, HIGH);
         int pwm = constrain(abs(speed), MIN_PWM, MAX_SPEED);
         ledcWrite(PWM_CHANNEL_RIGHT, pwm);
     } else if (speed < 0) {
-        // Arrière - Selon doc: BIN1=HIGH, BIN2=LOW
+        // Backward - per the datasheet: BIN1=HIGH, BIN2=LOW
         digitalWrite(MOTOR_RIGHT_DIR1, HIGH);
         digitalWrite(MOTOR_RIGHT_DIR2, LOW);
         int pwm = constrain(abs(speed), MIN_PWM, MAX_SPEED);
         ledcWrite(PWM_CHANNEL_RIGHT, pwm);
     } else {
-        // Arrêt
+        // Stop
         digitalWrite(MOTOR_RIGHT_DIR1, LOW);
         digitalWrite(MOTOR_RIGHT_DIR2, LOW);
         ledcWrite(PWM_CHANNEL_RIGHT, 0);
@@ -95,18 +95,18 @@ void motors_stop() {
 }
 
 void motors_drive(int throttle, int steering) {
-    // Convertit commandes type joystick en vitesses différentielles
-    // throttle: -255 (arrière) à +255 (avant)
-    // steering: -255 (gauche) à +255 (droite)
+    // Converts joystick-style commands into differential wheel speeds
+    // throttle: -255 (backward) to +255 (forward)
+    // steering: -255 (left) to +255 (right)
     
     throttle = constrain(throttle, -MAX_SPEED, MAX_SPEED);
     steering = constrain(steering, -MAX_SPEED, MAX_SPEED);
     
-    // Calcul vitesses différentielles
+    // Compute the differential speeds
     int leftSpeed = throttle + steering;
     int rightSpeed = throttle - steering;
     
-    // Limite pour éviter dépassement
+    // Clamp to avoid overflow
     leftSpeed = constrain(leftSpeed, -MAX_SPEED, MAX_SPEED);
     rightSpeed = constrain(rightSpeed, -MAX_SPEED, MAX_SPEED);
     

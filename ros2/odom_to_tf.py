@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Publie la transformation odom -> base_link en TF2 depuis les messages Odometry
-Cela bootstrape la chaîne TF pour SLAM Toolbox
+Publishes the odom -> base_link transform on TF2 from the Odometry messages
+This bootstraps the TF chain for SLAM Toolbox
 """
 import math
 import rclpy
@@ -17,17 +17,17 @@ class OdomToTF(Node):
         super().__init__('odom_to_tf')
         self.tf_broadcaster = TransformBroadcaster(self)
         
-        # Compatibilité QoS avec le bridge (BEST_EFFORT)
+        # QoS compatible with the bridge (BEST_EFFORT)
         qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
             depth=10
         )
         self.sub = self.create_subscription(Odometry, '/odom_ground_truth', self.odom_callback, qos)
-        self.get_logger().info('✅ Odom -> TF publisher lancé (odom -> base_link)')
+        self.get_logger().info('✅ Odom -> TF publisher started (odom -> base_link)')
 
     def odom_callback(self, msg):
-        # Créer une transformation odom -> base_link depuis le message Odometry
+        # Build an odom -> base_link transform from the Odometry message
         tf = TransformStamped()
         tf.header.stamp = msg.header.stamp
         tf.header.frame_id = 'odom'

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-ALGO V3: Rotation LENTE avec feedback SLAM-friendly
+ALGO V3: SLOW rotation with SLAM-friendly feedback
 
-Problème v2: Tourne trop vite (2.5 rad/s) => SLAM perd la pose
+Problem with v2: turns too fast (2.5 rad/s) => SLAM loses the pose
 Solution: 
-  1) Vitesse angulaire ULTRA-RÉDUITE (0.15-0.25 rad/s)
-  2) Lissage PD des rotations 
-  3) Pauses pour laisser SLAM traiter
-  4) Feedback LIDAR pour valider la rotation
+  1) VERY LOW angular speed (0.15-0.25 rad/s)
+  2) PD smoothing of the rotations 
+  3) Pauses to let SLAM process
+  4) LIDAR feedback to validate the rotation
 """
 
 import rclpy
@@ -34,7 +34,7 @@ def get_key():
 
 
 def normalize_angle(angle):
-    """Ramène un angle dans [-pi, pi]"""
+    """Wraps an angle into [-pi, pi]"""
     while angle > math.pi:
         angle -= 2 * math.pi
     while angle < -math.pi:
@@ -44,9 +44,9 @@ def normalize_angle(angle):
 
 class SLAMFriendlyController:
     """
-    Contrôleur de mouvement optimisé pour SLAM Toolbox.
-    - Rotations lentes et régulières
-    - Temps de repos entre les mouvements
+    Motion controller tuned for SLAM Toolbox.
+    - Slow, steady rotations
+    - Rest time between moves
     """
     
     def __init__(self):
@@ -62,7 +62,7 @@ class SLAMFriendlyController:
         self.kd = 0.4
         self.v_max = 0.60
         self.v_min = 0.15
-        self.w_max = 0.25  # ← DRASTIQUEMENT RÉDUIT (was 2.5!)
+        self.w_max = 0.25  # ← DRASTICALLY REDUCED (was 2.5!)
         self.k_turn = 1.0
         self.d_stop = 0.25
         self.d_slow = 0.60
@@ -70,10 +70,10 @@ class SLAMFriendlyController:
         self.fallback_half_deg = 20.0
         
         # ===== ROTATION CONTROL PARAMS (NEW) =====
-        # Pour rotations manuelles lentes
+        # For slow manual rotations
         self.rotation_speed = 0.15  # rad/s (ultra-slow: 8.6°/s)
-        self.rotation_pause = 0.3   # pause entre mouvements pour SLAM
-        self.slam_settle_time = 0.5 # attendre avant la prochaine action
+        self.rotation_pause = 0.3   # pause between moves for SLAM
+        self.slam_settle_time = 0.5 # wait before the next action
         
         # ===== STATE =====
         self.e_prev = 0.0
@@ -83,15 +83,15 @@ class SLAMFriendlyController:
         self.last_action_time = 0.0
         self.rotating_manually = False
         self.rotation_start_time = 0.0
-        self.rotation_target_time = 0.0  # durée totale
+        self.rotation_target_time = 0.0  # total duration
         
     def clamp(self, x, lo, hi):
         return max(lo, min(hi, x))
     
     def get_wall_follow_twist(self, scan):
         """
-        Calcule les cmd_vel pour le wall-following (algo v2).
-        Retourne (v, w, valid)
+        Computes the cmd_vel for wall following (algo v2).
+        Returns (v, w, valid)
         """
         if scan is None or len(scan.ranges) == 0:
             return 0.0, 0.0, False
@@ -202,9 +202,9 @@ class SLAMFriendlyController:
     
     def start_slow_rotation(self, direction_sign, duration_sec=None):
         """
-        Démarre une rotation lente.
-        direction_sign: +1 (CCW) ou -1 (CW)
-        duration_sec: si None, continue jusqu'à l'arrêt manuel
+        Starts a slow rotation.
+        direction_sign: +1 (CCW) or -1 (CW)
+        duration_sec: if None, keeps going until stopped manually
         """
         self.rotating_manually = True
         self.rotation_start_time = time.time()
@@ -213,35 +213,35 @@ class SLAMFriendlyController:
         else:
             self.rotation_target_time = None
         self.last_action_time = time.time()
-        print(f"  🔄 Rotation lente: {direction_sign:+.0f} @ {self.rotation_speed*180/math.pi:.1f}°/s")
+        print(f"  🔄 Slow rotation: {direction_sign:+.0f} @ {self.rotation_speed*180/math.pi:.1f}°/s")
     
     def stop_rotation(self):
-        """Arrête la rotation manuelle"""
+        """Stops the manual rotation"""
         self.rotating_manually = False
         self.last_action_time = time.time()
         print(f"  ⏸ Pause SLAM: {self.slam_settle_time:.1f}s")
     
     def get_manual_rotation_twist(self):
         """
-        Retourne le twist pour la rotation lente en cours.
-        Gère aussi l'arrêt automatique si duration spécifiée.
+        Returns the twist for the current slow rotation.
+        Also handles the automatic stop when a duration is given.
         """
         if not self.rotating_manually:
             return 0.0, 0.0
         
         elapsed = time.time() - self.rotation_start_time
         
-        # Si durée spécifiée, arrêter automatiquement
+        # If a duration is given, stop automatically
         if self.rotation_target_time is not None and elapsed >= self.rotation_target_time:
             self.stop_rotation()
             return 0.0, 0.0
         
-        # Sinon, continuer la rotation
-        w = self.rotation_speed  # Positif par défaut, négatif si inversé
+        # Otherwise, keep rotating
+        w = self.rotation_speed  # Positive by default, negative when reversed
         return 0.0, w
     
     def is_allowed_to_move(self):
-        """Vérifie si on peut bouger (délai SLAM respecté)"""
+        """Checks whether the robot may move (SLAM delay respected)"""
         elapsed = time.time() - self.last_action_time
         return elapsed >= self.slam_settle_time
 
@@ -266,15 +266,15 @@ def main():
     ╔════════════════════════════════════════════╗
     │   TELEOP V3: SLAM-FRIENDLY SLOW CONTROL   │
     ╠════════════════════════════════════════════╣
-    │  W/A/S/D  : Mouvement/Rotation LENTE      │
+    │  W/A/S/D  : SLOW motion/rotation          │
     │  SPACE    : Stop                          │
     │  M        : Toggle AUTO wall-follow       │
     │  R/L      : AUTO wall: RIGHT/LEFT         │
     │  Q        : Quit                          │
     ├────────────────────────────────────────────┤
-    │  ⚡ Rotations ULTRA-LENTES pour SLAM    │
-    │  ⏸ Pauses après chaque action           │
-    │  🔍 Feedback wall-follow optimisé        │
+    │  ⚡ VERY SLOW rotations for SLAM        │
+    │  ⏸ Pauses after each action             │
+    │  🔍 Tuned wall-follow feedback          │
     ╚════════════════════════════════════════════╝
     """)
     
@@ -294,7 +294,7 @@ def main():
                     twist.angular.z = float(w)
                     cmd_vel_pub.publish(twist)
             
-            # ===== ROTATION MANUELLE LENTE =====
+            # ===== SLOW MANUAL ROTATION =====
             if controller.rotating_manually:
                 v, w = controller.get_manual_rotation_twist()
                 twist.linear.x = 0.0

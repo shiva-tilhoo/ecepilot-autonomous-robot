@@ -81,10 +81,10 @@ ros2 launch rviz2 rviz2 -d ros2_ece_ws/lidar_config.rviz
 
 | Document | Description |
 |----------|-------------|
-| [00_SYNTHESE_FINALE.md](../ros2_ece_ws/00_SYNTHESE_FINALE.md) | Complete project summary |
+| [00_FINAL_SUMMARY.md](../ros2_ece_ws/00_FINAL_SUMMARY.md) | Complete project summary |
 | [QUICKSTART.md](../ros2_ece_ws/QUICKSTART.md) | 2-minute quick start |
-| [GUIDE_LIDAR_360_COMPLET.md](../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md) | LIDAR technical guide |
-| [GUIDE_RVIZ_CONFIGURATION.md](../ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md) | Detailed RViz configuration |
+| [LIDAR_360_GUIDE.md](../ros2_ece_ws/LIDAR_360_GUIDE.md) | LIDAR technical guide |
+| [RVIZ_CONFIGURATION_GUIDE.md](../ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md) | Detailed RViz configuration |
 | [MODIFICATIONS_SUMMARY.md](../ros2_ece_ws/MODIFICATIONS_SUMMARY.md) | Change history |
 
 ## 🔧 Architecture
@@ -161,7 +161,7 @@ docker run -it --rm microros/micro-ros-docker:humble bash
 
 ### RViz displays the data incorrectly
 1. Check the "lidar" frame in the RViz configuration
-2. See [GUIDE_RVIZ_CONFIGURATION.md](../ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md)
+2. See [RVIZ_CONFIGURATION_GUIDE.md](../ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md)
 
 ## 👤 Authors
 

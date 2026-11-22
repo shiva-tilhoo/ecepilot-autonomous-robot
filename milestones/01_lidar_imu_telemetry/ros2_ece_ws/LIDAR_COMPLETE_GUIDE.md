@@ -180,16 +180,16 @@ The subscriber automatically prints:
 
 ```
 ════════════════════════════════════════════
-🔍 SCAN LIDAR #1 reçu
+🔍 LIDAR SCAN #1 received
 Frame ID: lidar_link
-Nombre de points: 360
+Number of points: 360
 Angle Min/Max: 0.00 / 6.28 rad (0.0° / 360.0°)
 Angle Increment: 0.0175 rad (1.00°)
 Range Min/Max: 0.06 / 12.00 m
 ════════════════════════════════════════════
 
-⚠️  Obstacle le plus proche: 0.52 m @ indice 45 (angle: 45.0°)
-📈 Statistiques - Points valides: 360 / 360, Distance moyenne: 5.32 m
+⚠️  Closest obstacle: 0.52 m @ index 45 (angle: 45.0°)
+📈 Statistics - Valid points: 360 / 360, Mean distance: 5.32 m
 ```
 
 **Key information:**

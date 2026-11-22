@@ -1,5 +1,5 @@
 #!/bin/bash
-# Test du robot autonome avec SLAM
+# Autonomous robot test with SLAM
 
 echo "🧹 Cleaning up..."
 pkill -9 simu_lidar 2>/dev/null || true
@@ -15,11 +15,11 @@ echo "==========================================="
 echo "🤖 ROBOT AUTONOME + SLAM"
 echo "==========================================="
 echo ""
-echo "Appuyez sur 'A' dans la fenêtre pygame"
-echo "pour activer le mode AUTONOME!"
+echo "Press 'A' in the pygame window"
+echo "to enable AUTONOMOUS mode!"
 echo ""
 
-echo "1️⃣  Simulator (avec mode autonome)..."
+echo "1️⃣  Simulator (with autonomous mode)..."
 python3 simu_lidar_auto.py &
 sleep 1
 
@@ -56,11 +56,11 @@ echo "==========================================="
 echo "✅ READY!"
 echo "==========================================="
 echo ""
-echo "🎮 CONTRÔLES:"
+echo "🎮 CONTROLS:"
 echo "   A          = Toggle mode AUTONOME"
-echo "   Flèches    = Contrôle manuel"
+echo "   Arrows     = Manual control"
 echo ""
-echo "📊 Observer: python3 compare_rf2o_vs_slam.py"
+echo "📊 Monitor: python3 compare_rf2o_vs_slam.py"
 echo "🛑 Stop:     pkill -9 -f 'simu_|rf2o|slam'"
 echo ""
 

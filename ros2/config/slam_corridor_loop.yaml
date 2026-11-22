@@ -16,46 +16,46 @@ slam_toolbox:
     ceres_loss_function: HuberLoss
     
     # --- MAP UPDATE ---
-    map_update_interval: 0.3       # Plus rapide pour corrections temps réel
+    map_update_interval: 0.3       # Faster for real-time corrections
     resolution: 0.05
     
-    # --- SCAN MATCHING DÉSACTIVÉ - Suivre RF2O uniquement ---
-    use_scan_matching: true           # ❌ OFF - laisse RF2O faire tout le travail
+    # --- SCAN MATCHING DISABLED - follow RF2O only ---
+    use_scan_matching: true           # ❌ OFF - lets RF2O do all the work
     use_response_expansion: true
     minimum_travel_distance: 0.05
     minimum_travel_heading: 0.05
     minimum_time_interval: 0.05
     
-    # ⭐ LOOP CLOSURE - DÉSACTIVÉ (cause divergence catastrophique) ---
+    # ⭐ LOOP CLOSURE - DISABLED (causes catastrophic divergence) ---
     do_loop_closing: true
     
-    # --- SEARCH SPACE (conservateur) ---
-    correlation_search_space_dimension: 0.5    # CONSERVATEUR - pas trop loin de l'odom
+    # --- SEARCH SPACE (conservative) ---
+    correlation_search_space_dimension: 0.5    # CONSERVATIVE - not too far from the odom
     correlation_search_space_resolution: 0.01
     correlation_search_space_smear_deviation: 0.1
-    loop_search_space_dimension: 8.0           # Modéré
+    loop_search_space_dimension: 8.0           # Moderate
     loop_search_space_resolution: 0.05
     loop_search_space_smear_deviation: 0.1
     
-    # --- ANGLE SEARCH (optimisé pour virages) ---
-    coarse_search_angle_offset: 0.8            # Plus large pour détecter erreurs rotation
-    coarse_angle_resolution: 0.0262            # 1.5° - plus fin
-    fine_search_angle_offset: 0.3              # Double l'espace de recherche fine
-    fine_angle_resolution: 0.00436             # 0.25° - très fin pour virages
+    # --- ANGLE SEARCH (tuned for turns) ---
+    coarse_search_angle_offset: 0.8            # Wider to detect rotation errors
+    coarse_angle_resolution: 0.0262            # 1.5° - finer
+    fine_search_angle_offset: 0.3              # Doubles the fine search space
+    fine_angle_resolution: 0.00436             # 0.25° - very fine for turns
     
-    # --- VARIANCE PENALTIES (ULTRA STRICT - coller à RF2O) ---
-    angle_variance_penalty: 1.0               # ULTRA STRICT - ne quasi jamais s'écarter
-    distance_variance_penalty: 1.0            # ULTRA STRICT - rester collé à RF2O
+    # --- VARIANCE PENALTIES (ULTRA STRICT - stick to RF2O) ---
+    angle_variance_penalty: 1.0               # ULTRA STRICT - almost never deviate
+    distance_variance_penalty: 1.0            # ULTRA STRICT - stay glued to RF2O
     
-    # --- OPTIMIZATION (renforcé) ---
-    max_iterations: 20             # AUGMENTÉ pour meilleure convergence graphe
+    # --- OPTIMIZATION (strengthened) ---
+    max_iterations: 20             # RAISED for better graph convergence
     num_threads: 4
     
     # --- LINK MATCHING ---
     link_match_minimum_response_fine: 0.6
     link_scan_maximum_distance: 2.0
     
-    # --- STABILIZATION (augmenté pour éviter message dropping) ---
+    # --- STABILIZATION (raised to avoid message dropping) ---
     tf_buffer_duration: 60.0
     transform_timeout: 2.0
     

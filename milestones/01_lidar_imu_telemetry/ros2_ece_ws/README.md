@@ -24,9 +24,9 @@ ros2_ece_ws/
 │
 ├── lidar_config.rviz             # Pre-tuned RViz configuration
 ├── QUICKSTART.md                 # Quick start guide
-├── 00_SYNTHESE_FINALE.md         # Complete project summary
-├── GUIDE_LIDAR_360_COMPLET.md    # Detailed technical guide
-├── GUIDE_RVIZ_CONFIGURATION.md   # RViz configuration explained
+├── 00_FINAL_SUMMARY.md         # Complete project summary
+├── LIDAR_360_GUIDE.md    # Detailed technical guide
+├── RVIZ_CONFIGURATION_GUIDE.md   # RViz configuration explained
 │
 ├── run_lidar.sh                  # Listener launch script
 ├── run_rviz.sh                   # RViz launch script
@@ -209,7 +209,7 @@ ros2 launch rviz2 rviz2
 # Menu: File > Save Config As > lidar_config_custom.rviz
 ```
 
-For more details, see [GUIDE_RVIZ_CONFIGURATION.md](GUIDE_RVIZ_CONFIGURATION.md).
+For more details, see [RVIZ_CONFIGURATION_GUIDE.md](RVIZ_CONFIGURATION_GUIDE.md).
 
 ## 📈 Monitoring and Debugging
 
@@ -351,9 +351,9 @@ colcon build --event-handlers console_direct+
 | Document | Content |
 |----------|---------|
 | [QUICKSTART.md](QUICKSTART.md) | Quick start (2 min) |
-| [00_SYNTHESE_FINALE.md](00_SYNTHESE_FINALE.md) | Complete project summary |
-| [GUIDE_LIDAR_360_COMPLET.md](GUIDE_LIDAR_360_COMPLET.md) | Detailed technical guide |
-| [GUIDE_RVIZ_CONFIGURATION.md](GUIDE_RVIZ_CONFIGURATION.md) | RViz configuration explained |
+| [00_FINAL_SUMMARY.md](00_FINAL_SUMMARY.md) | Complete project summary |
+| [LIDAR_360_GUIDE.md](LIDAR_360_GUIDE.md) | Detailed technical guide |
+| [RVIZ_CONFIGURATION_GUIDE.md](RVIZ_CONFIGURATION_GUIDE.md) | RViz configuration explained |
 | [MODIFICATIONS_SUMMARY.md](MODIFICATIONS_SUMMARY.md) | Change history |
 
 ## 🏃 Quick Commands

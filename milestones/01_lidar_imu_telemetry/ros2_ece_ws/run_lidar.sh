@@ -2,7 +2,7 @@
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # directory of this script
 
 # ============================================================
-# Script Helper pour lancer le système LIDAR complet
+# Helper script to start the complete LIDAR system
 # ============================================================
 
 set -e
@@ -10,14 +10,14 @@ set -e
 WORKSPACE_PATH="$HERE"
 PACKAGE="cpp_pubsub"
 
-# Couleurs
+# Colours
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Fonctions
+# Functions
 print_header() {
     echo -e "${BLUE}════════════════════════════════════════════${NC}"
     echo -e "${BLUE}$1${NC}"
@@ -36,92 +36,92 @@ print_error() {
     echo -e "${RED}✗ $1${NC}"
 }
 
-# Vérifications
+# Checks
 check_requirements() {
-    print_header "🔍 Vérification des dépendances"
+    print_header "🔍 Checking dependencies"
     
     if ! command -v colcon &> /dev/null; then
-        print_error "colcon non installé"
-        echo "Installation: sudo apt install python3-colcon-common-extensions"
+        print_error "colcon not installed"
+        echo "Install with: sudo apt install python3-colcon-common-extensions"
         exit 1
     fi
-    print_success "colcon installé"
+    print_success "colcon installed"
     
     if ! command -v ros2 &> /dev/null; then
-        print_error "ROS2 non trouvé"
-        echo "Assurez-vous d'avoir source install/setup.bash"
+        print_error "ROS2 not found"
+        echo "Make sure you sourced install/setup.bash"
         exit 1
     fi
-    print_success "ROS2 trouvé"
+    print_success "ROS2 found"
     
     if [ ! -d "$WORKSPACE_PATH" ]; then
-        print_error "Workspace non trouvé: $WORKSPACE_PATH"
+        print_error "Workspace not found: $WORKSPACE_PATH"
         exit 1
     fi
-    print_success "Workspace trouvé"
+    print_success "Workspace found"
 }
 
 # Build
 build_package() {
-    print_header "🔨 Construction du package"
+    print_header "🔨 Building the package"
     
     cd "$WORKSPACE_PATH"
     
     if colcon build --packages-select $PACKAGE 2>&1 | grep -i error; then
-        print_error "Compilation échouée"
+        print_error "Build failed"
         exit 1
     fi
     
-    print_success "Package compilé avec succès"
+    print_success "Package built successfully"
 }
 
 # Source
 source_setup() {
-    print_header "📦 Configuration de l'environnement"
+    print_header "📦 Setting up the environment"
     
     source "$WORKSPACE_PATH/install/setup.bash"
-    print_success "Environment configuré"
+    print_success "Environment ready"
 }
 
-# Lancer le système
+# Start the system
 run_system() {
     local mode=$1
     
-    print_header "🚀 Lancement du système"
+    print_header "🚀 Starting the system"
     
     case $mode in
         publisher)
-            print_warning "Lancement du Publisher uniquement"
+            print_warning "Starting the Publisher only"
             ros2 run $PACKAGE talker
             ;;
         subscriber)
-            print_warning "Lancement du Subscriber uniquement"
+            print_warning "Starting the Subscriber only"
             ros2 run $PACKAGE listener
             ;;
         both)
-            print_warning "Lancement du Publisher et Subscriber"
-            echo "Note: Ouvrez 2 terminaux séparés:"
+            print_warning "Starting the Publisher and the Subscriber"
+            echo "Note: open 2 separate terminals:"
             echo "  Terminal 1: ros2 run $PACKAGE talker"
             echo "  Terminal 2: ros2 run $PACKAGE listener"
             ;;
         launch)
-            print_warning "Lancement avec launch file"
+            print_warning "Starting with the launch file"
             ros2 launch $PACKAGE lidar_launch.py
             ;;
         launch-complete)
-            print_warning "Lancement complet (Publisher + Subscriber + RViz)"
+            print_warning "Full start (Publisher + Subscriber + RViz)"
             ros2 launch $PACKAGE lidar_complete_launch.py
             ;;
         agent)
-            print_warning "Lancement avec agent micro_ros"
+            print_warning "Starting with the micro_ros agent"
             ros2 launch $PACKAGE agent_launch.py
             ;;
         monitor)
-            print_warning "Monitoring des topics"
-            echo "Topics disponibles:"
+            print_warning "Monitoring the topics"
+            echo "Available topics:"
             ros2 topic list
             echo ""
-            echo "Fréquence des topics:"
+            echo "Topic rates:"
             for topic in /scan /data; do
                 if ros2 topic list | grep -q $topic; then
                     echo "  $topic: $(ros2 topic hz $topic --window 3 2>/dev/null | tail -1)"
@@ -136,33 +136,33 @@ run_system() {
     esac
 }
 
-# Afficher l'aide
+# Show the help
 print_usage() {
     cat << EOF
 ${BLUE}Usage: $0 [OPTION]${NC}
 
 Options:
-    ${GREEN}publisher${NC}       Lancer uniquement le Publisher
-    ${GREEN}subscriber${NC}      Lancer uniquement le Subscriber
-    ${GREEN}both${NC}           Afficher les commandes pour les 2 nodes
-    ${GREEN}launch${NC}         Lancer avec launch file (Publisher + Subscriber)
-    ${GREEN}launch-complete${NC} Lancer complet (Publisher + Subscriber + RViz)
-    ${GREEN}agent${NC}          Lancer pour recevoir du ESP32 Agent
-    ${GREEN}monitor${NC}        Monitor les topics ROS2
-    ${GREEN}build${NC}          Compiler le package seulement
-    ${GREEN}clean${NC}          Nettoyer la compilation
-    ${GREEN}-h, --help${NC}      Afficher cette aide
+    ${GREEN}publisher${NC}       Start the Publisher only
+    ${GREEN}subscriber${NC}      Start the Subscriber only
+    ${GREEN}both${NC}           Show the commands for both nodes
+    ${GREEN}launch${NC}         Start with the launch file (Publisher + Subscriber)
+    ${GREEN}launch-complete${NC} Full start (Publisher + Subscriber + RViz)
+    ${GREEN}agent${NC}          Start to receive data from the ESP32 agent
+    ${GREEN}monitor${NC}        Monitor the ROS2 topics
+    ${GREEN}build${NC}          Build the package only
+    ${GREEN}clean${NC}          Clean the build
+    ${GREEN}-h, --help${NC}      Show this help
 
-Exemples:
-    $0 launch              # Lancer simple
-    $0 publisher           # Lancer le publisher
-    $0 monitor             # Voir les topics actifs
+Examples:
+    $0 launch              # Simple start
+    $0 publisher           # Start the publisher
+    $0 monitor             # Show the active topics
 
 Topics ROS2:
-    /scan                  LaserScan (données LIDAR)
-    /data                  Int32 (compteur)
+    /scan                  LaserScan (LIDAR data)
+    /data                  Int32 (counter)
 
-Fichiers importants:
+Important files:
     Launch files: $WORKSPACE_PATH/src/$PACKAGE/launch/
     Package config: $WORKSPACE_PATH/src/$PACKAGE/CMakeLists.txt
     README: $WORKSPACE_PATH/src/$PACKAGE/README.md
@@ -187,10 +187,10 @@ main() {
             exit 0
             ;;
         clean)
-            print_header "🧹 Nettoyage"
+            print_header "🧹 Cleaning"
             cd "$WORKSPACE_PATH"
             rm -rf build install log
-            print_success "Nettoyage terminé"
+            print_success "Clean finished"
             exit 0
             ;;
         *)

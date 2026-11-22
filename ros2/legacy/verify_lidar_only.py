@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Vérifier que LIDAR-ONLY mode est bien configuré
+Checks that LIDAR-ONLY mode is configured correctly
 """
 
 import os

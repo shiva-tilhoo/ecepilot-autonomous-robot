@@ -1,7 +1,7 @@
 #!/bin/bash
-# Script pour lancer RViz dans un environnement propre sans snap conflicts
+# Starts RViz in a clean environment without snap conflicts
 
-# Nettoyer les variables snap de VS Code
+# Clear the VS Code snap variables
 unset XDG_CONFIG_DIRS_VSCODE_SNAP_ORIG
 unset GDK_BACKEND_VSCODE_SNAP_ORIG
 unset GIO_MODULE_DIR_VSCODE_SNAP_ORIG
@@ -25,11 +25,11 @@ unset LOCPATH_VSCODE_SNAP_ORIG
 unset GIO_MODULE_DIR
 unset GIO_LAUNCHED_DESKTOP_FILE
 
-# Enlever les chemins snap du PATH
+# Remove the snap paths from PATH
 export PATH="/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-# Remettre ROS environment
+# Restore the ROS environment
 source /opt/ros/humble/setup.bash
 
-# Lancer RViz
+# Start RViz
 exec rviz2 "$@"

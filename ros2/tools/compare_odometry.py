@@ -10,7 +10,7 @@ class OdomComparator(Node):
     def __init__(self):
         super().__init__('odom_comparator')
         
-        # QoS compatible avec BEST_EFFORT
+        # QoS compatible with BEST_EFFORT
         qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,

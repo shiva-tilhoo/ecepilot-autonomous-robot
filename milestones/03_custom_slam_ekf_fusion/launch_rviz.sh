@@ -1,12 +1,12 @@
 #!/bin/bash
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # directory of this script
 
-# Lance RViz avec config robuste (ignore les problèmes d'horloge ESP32)
+# Starts RViz with a robust config (ignores the ESP32 clock issues)
 
 source /opt/ros/humble/setup.bash
 source "$HERE/../01_lidar_imu_telemetry/ros2_ece_ws/install/setup.bash"
 
-# Crée une config RViz qui ignore les timestamps
+# Creates an RViz config that ignores the timestamps
 cat > /tmp/slam_view.rviz << 'EOF'
 Panels:
   - Class: rviz_common/Displays
@@ -173,5 +173,5 @@ Width: 1920
 Wrapping: 200
 EOF
 
-echo "🚀 Lançant RViz (Frame Timeout: 200s, ignore horloge ESP32)..."
+echo "🚀 Starting RViz (Frame Timeout: 200s, ESP32 clock ignored)..."
 rviz2 -d /tmp/slam_view.rviz --ros-args --remap __node:=rviz2_slam

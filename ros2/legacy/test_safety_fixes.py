@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test script pour valider les fixes de sécurité
-Compare l'ancienne config vs nouvelle config
+Test script that validates the safety fixes
+Compares the old config with the new one
 """
 
 import math
@@ -97,7 +97,7 @@ for test, description in tests:
 print()
 print("╔═══════════════════════════════════════════════════════════════════════════╗")
 print("║  All fixes have been applied to:                                         ║")
-print("║    • naif_autonome.py                                                   ║")
-print("║    • algo_naif_v2.py                                                    ║")
+print("║    • naive_autonomous.py                                                ║")
+print("║    • naive_mapper_v2.py                                                 ║")
 print("║    • config/slam_toolbox_params.yaml                                    ║")
 print("╚═══════════════════════════════════════════════════════════════════════════╝")

@@ -7,9 +7,9 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     """
-    Launch file pour agent micro_ros + RViz pour ESP32 LIDAR REEL
-    Affiche tous les 360 points du LIDAR en temps reel
-    Inclut le modele 3D de la voiture
+    Launch file for the micro_ros agent + RViz with the REAL ESP32 LIDAR
+    Shows all 360 LIDAR points live
+    Includes the 3D model of the car
     """
     
     # Get vehicle description package directory
@@ -18,15 +18,15 @@ def generate_launch_description():
         vehicle_description_dir, 'launch', 'vehicle_broadcaster.launch.py'
     )
     
-    # Chemin vers la config RViz (visualisation 3D optimisee)
+    # Path to the RViz config (optimised 3D view)
     rviz_config = os.path.join(
         os.path.dirname(__file__),
-        'lidar_buffer.rviz'  # Utiliser la config RViz pour PointCloud2
+        'lidar_buffer.rviz'  # Use the RViz config made for PointCloud2
     )
     
-    # Delai avant de lancer RViz (laisser le temps aux topics de se creer)
+    # Delay before starting RViz (gives the topics time to appear)
     rviz_delayed = TimerAction(
-        period=5.0,  # 5 secondes de delai
+        period=5.0,  # 5-second delay
         actions=[
             ExecuteProcess(
                 cmd=['rviz2', '-d', rviz_config],
@@ -37,16 +37,16 @@ def generate_launch_description():
     
     return LaunchDescription([
         LogInfo(msg="\n" + "="*70),
-        LogInfo(msg="[LAUNCH] ESP32 LIDAR - Configuration Micro ROS Agent + VOITURE 3D (RViz)"),
+        LogInfo(msg="[LAUNCH] ESP32 LIDAR - Micro ROS Agent setup + 3D CAR (RViz)"),
         LogInfo(msg="="*70 + "\n"),
         
-        # ==================== VEHICLE DESCRIPTION (modele 3D de la voiture) ====================
+        # ==================== VEHICLE DESCRIPTION (3D model of the car) ====================
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(vehicle_launch),
             launch_arguments={}.items(),
         ),
         
-        # ==================== TF BROADCASTER (publie la frame lidar_link) ====================
+        # ==================== TF BROADCASTER (publishes the lidar_link frame) ====================
         Node(
             package='cpp_pubsub',
             executable='tf_broadcaster',
@@ -54,18 +54,18 @@ def generate_launch_description():
             output='screen',
         ),
         
-        # ==================== BUFFER LIDAR (accumule les scans) ====================
+        # ==================== LIDAR BUFFER (accumulates the scans) ====================
         Node(
             package='cpp_pubsub',
             executable='lidar_buffer',
             name='lidar_buffer',
             output='screen',
             parameters=[
-                {'buffer_size': 20},  # Garde 20 scans (plus rapide a effacer)
+                {'buffer_size': 20},  # Keeps 20 scans (clears faster)
             ],
         ),
         
-        # ==================== LISTENER (recoit et log les donnees) ====================
+        # ==================== LISTENER (receives and logs the data) ====================
         Node(
             package='cpp_pubsub',
             executable='listener',
@@ -73,33 +73,33 @@ def generate_launch_description():
             output='screen',
         ),
         
-        # ==================== RVIZ VISUALIZER (avec delai) ====================
+        # ==================== RVIZ VISUALIZER (delayed) ====================
         rviz_delayed,
         
-        LogInfo(msg="\n[OK] Listener demarré - RViz se lancera dans 5 secondes\n"),
-        LogInfo(msg="[CONFIG] CONFIGURATION REQUISE:"),
-        LogInfo(msg="   Lancez l'agent micro_ros dans un AUTRE terminal:"),
+        LogInfo(msg="\n[OK] Listener started - RViz will start in 5 seconds\n"),
+        LogInfo(msg="[CONFIG] REQUIRED SETUP:"),
+        LogInfo(msg="   Start the micro_ros agent in ANOTHER terminal:"),
         LogInfo(msg="   "),
         LogInfo(msg="   docker run -it --rm microros/micro-ros-docker:humble \\"),
         LogInfo(msg="     ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888"),
         LogInfo(msg="   "),
-        LogInfo(msg="[TOPICS] TOPICS RECUS DE L'ESP32:"),
-        LogInfo(msg="   - /scan (sensor_msgs/LaserScan) - 360 points LIDAR"),
-        LogInfo(msg="   - /data (std_msgs/Int32) - Compteur"),
+        LogInfo(msg="[TOPICS] TOPICS RECEIVED FROM THE ESP32:"),
+        LogInfo(msg="   - /scan (sensor_msgs/LaserScan) - 360 LIDAR points"),
+        LogInfo(msg="   - /data (std_msgs/Int32) - Counter"),
         LogInfo(msg=""),
-        LogInfo(msg="[VISUAL] VISUALISATION RVIZ (3D):"),
-        LogInfo(msg="   - Modele 3D de la voiture au centre"),
-        LogInfo(msg="   - Points LIDAR en rouge autour du vehicule"),
-        LogInfo(msg="   - Boîte bleue = base du vehicule"),
-        LogInfo(msg="   - Cylindre rouge = LIDAR sur le toit"),
-        LogInfo(msg="   - Cylindres noirs = roues"),
-        LogInfo(msg="   - Grille XY pour orientation spatiale"),
-        LogInfo(msg="   - Frame: base_link (centre de la voiture)"),
+        LogInfo(msg="[VISUAL] RVIZ VISUALISATION (3D):"),
+        LogInfo(msg="   - 3D model of the car in the centre"),
+        LogInfo(msg="   - LIDAR points in red around the vehicle"),
+        LogInfo(msg="   - Blue box = vehicle base"),
+        LogInfo(msg="   - Red cylinder = LIDAR on the roof"),
+        LogInfo(msg="   - Black cylinders = wheels"),
+        LogInfo(msg="   - XY grid for spatial orientation"),
+        LogInfo(msg="   - Frame: base_link (centre of the car)"),
         LogInfo(msg=""),
-        LogInfo(msg="[TIPS] ASTUCES RVIZ:"),
-        LogInfo(msg="   - Utilisez le panneau 'Displays' pour activer/desactiver LaserScan"),
-        LogInfo(msg="   - Scroller pour zoomer, click-droit pour tourner la vue"),
-        LogInfo(msg="   - Augmentez 'Decay Time' pour voir l'historique"),
-        LogInfo(msg="   - Changez la couleur via 'Color Transformer'"),
+        LogInfo(msg="[TIPS] RVIZ TIPS:"),
+        LogInfo(msg="   - Use the 'Displays' panel to enable/disable LaserScan"),
+        LogInfo(msg="   - Scroll to zoom, right-click to rotate the view"),
+        LogInfo(msg="   - Increase 'Decay Time' to see the history"),
+        LogInfo(msg="   - Change the colour with 'Color Transformer'"),
         LogInfo(msg="\n" + "="*70 + "\n"),
     ])

@@ -75,7 +75,7 @@ pkill -f "slam_toolbox|rf2o|scan_restamper|static_transform_publisher" 2>/dev/nu
 sleep 1
 
 echo "[1/5] Static TF base_link -> laser_link"
-# Version simplifiée compatible Humble
+# Simplified version compatible with Humble
 ros2 run tf2_ros static_transform_publisher 0.10 0.0 0.15 0 0 0 base_link laser_link &
 TF_LASER_PID=$!
 sleep 1
@@ -86,7 +86,7 @@ RESTAMPER_PID=$!
 sleep 2
 
 echo "[3/5] Waiting for /scan"
-# On s'assure que le laser tourne
+# Make sure the laser is spinning
 python3 wait_for_topic.py /scan 15 || { echo "❌ /scan timeout"; exit 1; }
 
 echo "[4/5] RF2O (Synchronized with LiDAR)"

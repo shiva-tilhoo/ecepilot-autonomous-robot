@@ -52,7 +52,7 @@ class SimpleSLAM(Node):
         # Transform broadcaster
         self.tf_broadcaster = TransformBroadcaster(self)
         
-        # Timer pour publier la map à 10Hz
+        # Timer that publishes the map at 10Hz
         self.create_timer(0.1, self.timer_callback)
         self.last_timestamp = None
         
@@ -310,7 +310,7 @@ class SimpleSLAM(Node):
         self.tf_broadcaster.sendTransform(t)
 
     def timer_callback(self):
-        """Publie la map à 10Hz"""
+        """Publishes the map at 10Hz"""
         if self.last_timestamp is not None:
             self.publish_map(self.last_timestamp)
             self.publish_pose(self.last_timestamp)

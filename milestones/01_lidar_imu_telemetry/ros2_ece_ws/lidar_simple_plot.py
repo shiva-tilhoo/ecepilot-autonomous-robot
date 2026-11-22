@@ -21,7 +21,7 @@ class LidarLogger(Node):
             print(f"   Distance range: {min(ranges):.2f}m - {max(ranges):.2f}m")
             print(f"   Avg distance: {sum(ranges)/len(ranges):.2f}m")
         
-        # Plot en ASCII
+        # ASCII plot
         if ranges:
             max_dist = max(ranges)
             print(f"\n   Distance histogram (0-{max_dist:.1f}m):")
@@ -36,11 +36,11 @@ class LidarLogger(Node):
 def main():
     rclpy.init()
     node = LidarLogger()
-    print("🎯 LIDAR Data Logger - Affichage des données en temps réel\n")
+    print("🎯 LIDAR Data Logger - live data display\n")
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        print("\n\nArrêt...")
+        print("\n\nStopping...")
     finally:
         node.destroy_node()
         rclpy.shutdown()

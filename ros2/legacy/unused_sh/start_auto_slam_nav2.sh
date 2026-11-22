@@ -16,13 +16,13 @@ if [ -f "$WORKSPACE_ROOT/install/setup.bash" ]; then
 fi
 
 if ! ros2 pkg prefix slam_toolbox >/dev/null 2>&1; then
-  echo "❌ Package slam_toolbox introuvable"
+  echo "❌ slam_toolbox package not found"
   exit 1
 fi
 
 if ! ros2 pkg prefix nav2_bringup >/dev/null 2>&1; then
-  echo "❌ Package nav2_bringup introuvable"
-  echo "Installe Nav2: sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup"
+  echo "❌ nav2_bringup package not found"
+  echo "Install Nav2: sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup"
   exit 1
 fi
 
@@ -46,11 +46,11 @@ echo "2️⃣  Bridge (/scan + /odom_ground_truth)..."
 python3 simu_bridge.py &
 sleep 1
 
-echo "3️⃣  TF statique base_link -> laser_link..."
+echo "3️⃣  Static TF base_link -> laser_link..."
 ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 1 base_link laser_link &
 sleep 0.5
 
-echo "4️⃣  TF dynamique odom -> base_link..."
+echo "4️⃣  Dynamic TF odom -> base_link..."
 python3 odom_to_tf.py &
 sleep 1
 
@@ -71,9 +71,9 @@ ros2 launch nav2_bringup navigation_launch.py \
 sleep 3
 
 if ros2 action list 2>/dev/null | grep -q "/navigate_to_pose"; then
-  echo "✅ Nav2 action server prêt: /navigate_to_pose"
+  echo "✅ Nav2 action server ready: /navigate_to_pose"
 else
-  echo "⚠️ Nav2 pas prêt: /navigate_to_pose absent (voir logs planner_server)"
+  echo "⚠️ Nav2 not ready: /navigate_to_pose missing (see the planner_server logs)"
 fi
 
 echo "8️⃣  Map saver + odom_slam debug..."
@@ -86,10 +86,10 @@ echo "==========================================="
 echo "✅ READY (SLAM + NAV2)"
 echo "==========================================="
 echo ""
-echo "🎯 TEST NAV2 (dans RViz):"
+echo "🎯 NAV2 TEST (in RViz):"
 echo "   1) ros2 run rviz2 rviz2 -d rviz_simu_nav2.rviz"
-echo "   2) Outil '2D Goal Pose' pour envoyer un objectif"
-echo "   3) Goal auto début de piste: python3 nav2_goal_start.py"
+echo "   2) '2D Goal Pose' tool to send a goal"
+echo "   3) Automatic goal at the start of the track: python3 nav2_goal_start.py"
 echo ""
 echo "📊 Monitoring:"
 echo "   ros2 topic echo /plan --once"

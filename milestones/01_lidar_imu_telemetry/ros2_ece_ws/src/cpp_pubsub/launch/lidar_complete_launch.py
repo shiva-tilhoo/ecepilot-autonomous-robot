@@ -15,7 +15,7 @@ def generate_launch_description():
     return LaunchDescription([
         # ==================== LOGS ====================
         LogInfo(msg="\n" + "="*60),
-        LogInfo(msg="📊 Système Complet LIDAR + micro_ros"),
+        LogInfo(msg="📊 Complete LIDAR + micro_ros system"),
         LogInfo(msg="="*60),
         
         # ==================== PUBLISHER LIDAR ====================
@@ -44,12 +44,12 @@ def generate_launch_description():
                 os.path.expanduser('~'),
                 '.rviz2/default.rviz'
             )],
-            # Optionnel: remplacer par config custom
+            # Optional: replace with a custom config
         ),
         
-        LogInfo(msg="✅ Système lancé avec succès!"),
+        LogInfo(msg="✅ System started successfully!"),
         LogInfo(msg="  📡 Publisher: /scan (LaserScan) + /data (Int32)"),
-        LogInfo(msg="  📥 Subscriber: Affichage console des données"),
-        LogInfo(msg="  🎨 RViz: Visualisation 3D"),
+        LogInfo(msg="  📥 Subscriber: console display of the data"),
+        LogInfo(msg="  🎨 RViz: 3D visualisation"),
         LogInfo(msg="="*60 + "\n"),
     ])

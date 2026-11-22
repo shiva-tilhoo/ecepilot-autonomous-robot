@@ -6,7 +6,7 @@ Complete **3-phase autonomous mapping** system for the real robot on its mat:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Phase 1: AUTONOME (autonomous)                              │
+│ Phase 1: AUTONOMOUS                                         │
 │ - The robot follows the walls (wall_centering_node)        │
 │ - Records trajectory + pose (loop_closure_detector)        │
 │ - Builds the SLAM Toolbox map                               │

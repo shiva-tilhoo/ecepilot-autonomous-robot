@@ -4,53 +4,53 @@ slam_toolbox:
     use_sim_time: false
     mode: mapping
     scan_topic: /scan
-    odom_topic: /odom_rf2o  # ← UTILISE DIRECTEMENT RF2O!
+    odom_topic: /odom_rf2o  # ← USES RF2O DIRECTLY!
     odom_frame: odom
     base_frame: base_link
     map_frame: map
-    scan_queue_size: 20  # Réduit pour traiter plus vite
+    scan_queue_size: 20  # Reduced to process faster
     
-    # --- SOLVER AGRESSIF ---
+    # --- AGGRESSIVE SOLVER ---
     solver_plugin: solver_plugins::CeresSolver
     ceres_dogleg_type: TRADITIONAL_DOGLEG
     ceres_loss_function: HuberLoss
     
-    # --- MAP UPDATE RAPIDE ---
-    map_update_interval: 0.5  # Update toutes les 0.5 secondes (rapide!)
-    resolution: 0.05  # 5cm par pixel
+    # --- FAST MAP UPDATE ---
+    map_update_interval: 0.5  # Update every 0.5 seconds (fast!)
+    resolution: 0.05  # 5cm per pixel
     
-    # --- SCAN MATCHING AGRESSIF (pour corridors serrés) ---
+    # --- AGGRESSIVE SCAN MATCHING (for narrow corridors) ---
     use_scan_matching: true
     use_response_expansion: true
-    minimum_travel_distance: 0.02  # Traite tous les 2cm (très agressif)
-    minimum_travel_heading: 0.02   # Traite tous les 2° (~1.15°)
+    minimum_travel_distance: 0.02  # Process every 2cm (very aggressive)
+    minimum_travel_heading: 0.02   # Process every 0.02 rad (~1.15°)
     minimum_time_interval: 0.05    # Process at 20 Hz max
     
-    # --- LOOP CLOSURE (désactivé pour stabilité) ---
-    do_loop_closing: false  # Désactivé pour éviter reset graphe
+    # --- LOOP CLOSURE (disabled for stability) ---
+    do_loop_closing: false  # Disabled to avoid resetting the graph
     
-    # --- SEARCH SPACE (adapté aux corridors) ---
-    correlation_search_space_dimension: 0.3  # Réduit (corridors = moins d'ambiguïté)
+    # --- SEARCH SPACE (suited to corridors) ---
+    correlation_search_space_dimension: 0.3  # Reduced (corridors = less ambiguity)
     correlation_search_space_resolution: 0.01
     correlation_search_space_smear_deviation: 0.02
     
-    # --- ANGLE SEARCH (rotation pure supportée) ---
-    coarse_search_angle_offset: 0.5        # Large pour rotation pure
-    coarse_angle_resolution: 0.0349        # ~2 degrés
-    fine_search_angle_offset: 0.15         # Fine search sur 15°
-    fine_angle_resolution: 0.00873         # ~0.5 degrés
+    # --- ANGLE SEARCH (pure rotation supported) ---
+    coarse_search_angle_offset: 0.5        # Wide for pure rotation
+    coarse_angle_resolution: 0.0349        # ~2 degrees
+    fine_search_angle_offset: 0.15         # Fine search over 15°
+    fine_angle_resolution: 0.00873         # ~0.5 degrees
     
-    # --- VARIANCE PENALTIES (faible = confiance aux scans) ---
-    angle_variance_penalty: 0.0001    # Très faible pour corriger angle agressivement
-    distance_variance_penalty: 0.001  # Faible pour suivre RF2O
+    # --- VARIANCE PENALTIES (low = trust the scans) ---
+    angle_variance_penalty: 0.0001    # Very low to correct the angle aggressively
+    distance_variance_penalty: 0.001  # Low to follow RF2O
     
-    # --- OPTIMIZATION (rapide et efficace) ---
-    max_iterations: 5       # Réduit pour vitesse
-    num_threads: 4          # Parallélisation
+    # --- OPTIMIZATION (fast and efficient) ---
+    max_iterations: 5       # Reduced for speed
+    num_threads: 4          # Parallelism
     
-    # --- LINK MATCHING (évite graphe complexe) ---
-    link_match_minimum_response_fine: 0.7    # Plus strict
-    link_scan_maximum_distance: 1.5          # Liens courts seulement
+    # --- LINK MATCHING (avoids a complex graph) ---
+    link_match_minimum_response_fine: 0.7    # Stricter
+    link_scan_maximum_distance: 1.5          # Short links only
     
     # --- STABILIZATION ---
     tf_buffer_duration: 30.0
@@ -59,9 +59,9 @@ slam_toolbox:
     # --- DEBUG ---
     debug_logging: false
     
-    # --- THROTTLE (évite surcharge) ---
-    throttle_scans: 1  # Process chaque scan
+    # --- THROTTLE (avoids overload) ---
+    throttle_scans: 1  # Process every scan
     
     # --- OCCUPANCY GRID ---
-    occupied_threshold: 65   # Seuil pour obstacle
-    free_threshold: 25       # Seuil pour libre
+    occupied_threshold: 65   # Threshold for an obstacle
+    free_threshold: 25       # Threshold for free space

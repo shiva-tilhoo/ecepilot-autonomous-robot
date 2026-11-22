@@ -98,9 +98,9 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/QUICKSTART.md
 
 ---
 
-### 2. **RESUME_MODIFICATIONS.md** - Technical overview
+### 2. **CHANGES_SUMMARY.md** - Technical overview
 ```
-milestones/01_lidar_imu_telemetry/ros2_ece_ws/RESUME_MODIFICATIONS.md
+milestones/01_lidar_imu_telemetry/ros2_ece_ws/CHANGES_SUMMARY.md
 ```
 ✅ Modified files and their changes  
 ✅ Complete data flow  
@@ -110,9 +110,9 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/RESUME_MODIFICATIONS.md
 
 ---
 
-### 3. **GUIDE_LIDAR_360_COMPLET.md** - Complete guide
+### 3. **LIDAR_360_GUIDE.md** - Complete guide
 ```
-milestones/01_lidar_imu_telemetry/ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md
+milestones/01_lidar_imu_telemetry/ros2_ece_ws/LIDAR_360_GUIDE.md
 ```
 ✅ Complete build procedure  
 ✅ Step-by-step RViz configuration  
@@ -123,9 +123,9 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md
 
 ---
 
-### 4. **GUIDE_RVIZ_CONFIGURATION.md** - RViz in detail
+### 4. **RVIZ_CONFIGURATION_GUIDE.md** - RViz in detail
 ```
-milestones/01_lidar_imu_telemetry/ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md
+milestones/01_lidar_imu_telemetry/ros2_ece_ws/RVIZ_CONFIGURATION_GUIDE.md
 ```
 ✅ Automatic configuration explained  
 ✅ 6 manual adjustment cases  
@@ -136,9 +136,9 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/GUIDE_RVIZ_CONFIGURATION.md
 
 ---
 
-### 5. **CHANGEMENTS_DETAILS.md** - Code by code
+### 5. **DETAILED_CHANGES.md** - Code by code
 ```
-milestones/01_lidar_imu_telemetry/ros2_ece_ws/CHANGEMENTS_DETAILS.md
+milestones/01_lidar_imu_telemetry/ros2_ece_ws/DETAILED_CHANGES.md
 ```
 ✅ Before/after for each file  
 ✅ Exact code changed  
@@ -155,17 +155,17 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/CHANGEMENTS_DETAILS.md
 2. Run the 3 commands
 
 ### To **understand the technical side**
-1. Read `RESUME_MODIFICATIONS.md`
-2. Read `CHANGEMENTS_DETAILS.md`
+1. Read `CHANGES_SUMMARY.md`
+2. Read `DETAILED_CHANGES.md`
 3. Explore the modified code
 
 ### To **configure RViz**
-1. Read `GUIDE_RVIZ_CONFIGURATION.md`
+1. Read `RVIZ_CONFIGURATION_GUIDE.md`
 2. Follow the use cases
 3. Adjust as needed
 
 ### For a **complete reference**
-1. Read `GUIDE_LIDAR_360_COMPLET.md`
+1. Read `LIDAR_360_GUIDE.md`
 
 ---
 
@@ -175,10 +175,10 @@ milestones/01_lidar_imu_telemetry/ros2_ece_ws/CHANGEMENTS_DETAILS.md
 milestones/01_lidar_imu_telemetry/
 ├── ros2_ece_ws/
 │   ├── 📖 QUICKSTART.md                    (Quick start)
-│   ├── 📋 RESUME_MODIFICATIONS.md          (Overview)
-│   ├── 📚 GUIDE_LIDAR_360_COMPLET.md       (Complete)
-│   ├── 🎨 GUIDE_RVIZ_CONFIGURATION.md      (RViz detail)
-│   ├── 💻 CHANGEMENTS_DETAILS.md           (Code by code)
+│   ├── 📋 CHANGES_SUMMARY.md          (Overview)
+│   ├── 📚 LIDAR_360_GUIDE.md       (Complete)
+│   ├── 🎨 RVIZ_CONFIGURATION_GUIDE.md      (RViz detail)
+│   ├── 💻 DETAILED_CHANGES.md           (Code by code)
 │   ├── 🚀 deploy_lidar.sh                  (Check script)
 │   │
 │   └── src/
@@ -204,7 +204,7 @@ milestones/01_lidar_imu_telemetry/
 ✓ Circular buffer:         LIDAR_BUFFER_SIZE 720
 ✓ Buffer size:             60 frames × 12 points
 ✓ LIDAR publishing:        rcl_publish(&pub_lidar)
-✓ RViz configuration:      LaserScan (Tous les 360 points)
+✓ RViz configuration:      LaserScan 360
 ✓ Launch guide:            360 LIDAR points
 ```
 
@@ -236,13 +236,13 @@ sudo apt install ros-humble-rviz2 \
 1. `QUICKSTART.md` → start the 3 terminals
 
 **Scenario 2: I want to understand**
-1. `RESUME_MODIFICATIONS.md` (overview)
-2. `CHANGEMENTS_DETAILS.md` (code)
-3. `GUIDE_LIDAR_360_COMPLET.md` (complete)
+1. `CHANGES_SUMMARY.md` (overview)
+2. `DETAILED_CHANGES.md` (code)
+3. `LIDAR_360_GUIDE.md` (complete)
 
 **Scenario 3: I have problems**
-1. `GUIDE_LIDAR_360_COMPLET.md` → "Troubleshooting" section
-2. `GUIDE_RVIZ_CONFIGURATION.md` → "Advanced Troubleshooting" section
+1. `LIDAR_360_GUIDE.md` → "Troubleshooting" section
+2. `RVIZ_CONFIGURATION_GUIDE.md` → "Advanced Troubleshooting" section
 3. `deploy_lidar.sh` → run the checks again
 
 ---

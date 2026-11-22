@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-REAL ROBOT MAPPING AUTO - Orchestrateur principal pour robot réel
+REAL ROBOT MAPPING AUTO - Main orchestrator for the real robot
 
-Gère les 3 phases du mapping autonome:
-1. AUTONOME: Suivi mur + enregistrement trajec (wall_centering_node)
-2. DÉTECTION: Boucle complétée (loop_closure_detector)
-3. RETOUR: Suivi chemin A* vers le départ (simple PID control)
+Handles the 3 phases of autonomous mapping:
+1. AUTONOMOUS: wall following + trajectory recording (wall_centering_node)
+2. DETECTION: loop completed (loop_closure_detector)
+3. RETURN: A* path following back to the start (simple PID control)
 
-Lance en parallèle:
-- wall_centering_node (autonomie)
-- loop_closure_detector (détection boucle)
-- trajectory_saver (sauvegarde trajec)
+Starts in parallel:
+- wall_centering_node (autonomy)
+- loop_closure_detector (loop detection)
+- trajectory_saver (trajectory saving)
 - return_path_generator (A* planning)
 """
 
@@ -33,30 +33,30 @@ from sensor_msgs.msg import LaserScan
 
 
 class RobotState(Enum):
-    """États du robot durant le mapping autonome"""
-    AUTONOME = 1        # Mode autonome (suivi mur)
-    RETURN_PLANNED = 2  # Retour planifié, attente signal
-    RETURNING = 3       # Suivi du chemin de retour
-    COMPLETED = 4       # Mission terminée
+    """Robot states during autonomous mapping"""
+    AUTONOMOUS = 1      # Autonomous mode (wall following)
+    RETURN_PLANNED = 2  # Return planned, waiting for the signal
+    RETURNING = 3       # Following the return path
+    COMPLETED = 4       # Mission complete
 
 
 class RealRobotMappingAuto(Node):
     def __init__(self):
         super().__init__('real_robot_mapping_auto')
         
-        # État global
-        self.state = RobotState.AUTONOME
+        # Global state
+        self.state = RobotState.AUTONOMOUS
         self.should_stop = False
         
         # TF2
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
-        # Paramètres retour
+        # Return parameters
         self.return_path_m = []  # [(x, y), ...]
         self.return_path_idx = 0
         
-        # Contrôle PID pour suivi chemin
+        # PID control for path following
         self.last_heading_error = 0.0
         self.return_kp = 1.8
         self.return_kd = 0.25
@@ -79,43 +79,43 @@ class RealRobotMappingAuto(Node):
         self.create_subscription(Float32, '/loop_closure/distance_to_start',
                                  self.distance_callback, 10)
         
-        # Publisher cmd_vel pour le retour
+        # cmd_vel publisher for the return
         self.pub_cmd_vel = self.create_publisher(Twist, '/cmd_vel_return', 10)
         self.pub_state = self.create_publisher(Bool, '/mapping_completed', 10)
         
-        # Timer pour contrôle principal
+        # Main control timer
         self.create_timer(0.05, self.control_loop)
         
-        self.get_logger().info("🤖 Real Robot Mapping Auto démarré")
-        self.get_logger().info("   Phase 1: AUTONOME (suivi mur)")
+        self.get_logger().info("🤖 Real Robot Mapping Auto started")
+        self.get_logger().info("   Phase 1: AUTONOMOUS (wall following)")
         self.get_logger().info("   Phase 2: RETURNING (A* path following)")
         self.get_logger().info("   Phase 3: COMPLETED")
     
     def path_callback(self, msg):
-        """Reçoit le chemin A* planifié depuis return_path_generator"""
+        """Receives the A* path planned by return_path_generator"""
         self.return_path_m = [
             (pose.pose.position.x, pose.pose.position.y)
             for pose in msg.poses
         ]
         self.return_path_idx = 0
         
-        self.get_logger().info(f"✅ Chemin reçu: {len(self.return_path_m)} points")
+        self.get_logger().info(f"✅ Path received: {len(self.return_path_m)} points")
     
     def return_detected_callback(self, msg):
-        """Appelé quand boucle est détectée - prépare retour planifié"""
-        if msg.data and self.state == RobotState.AUTONOME:
+        """Called when the loop is detected - prepares the planned return"""
+        if msg.data and self.state == RobotState.AUTONOMOUS:
             self.state = RobotState.RETURN_PLANNED
-            self.get_logger().info("🔄 État → RETURN_PLANNED (attente chemin A*)")
+            self.get_logger().info("🔄 State → RETURN_PLANNED (waiting for the A* path)")
     
     def distance_callback(self, msg):
-        """Reçoit distance au départ (info)"""
+        """Receives the distance to the start (info)"""
         if self.state == RobotState.RETURNING:
-            pass  # Pourrait être utilisé pour ajustement fin
+            pass  # Could be used for fine adjustment
     
     def get_robot_pose_in_map(self):
         """
-        Récupère pose robot dans frame map
-        Retourne: (x_m, y_m, theta_rad) ou None
+        Gets the robot pose in the map frame
+        Returns: (x_m, y_m, theta_rad) or None
         """
         try:
             tf = self.tf_buffer.lookup_transform(
@@ -136,14 +136,14 @@ class RealRobotMappingAuto(Node):
             return None
     
     def compute_desired_heading(self, robot_x_m, robot_y_m, target_x_m, target_y_m):
-        """Calcule cap désirée vers cible"""
+        """Computes the desired heading towards the target"""
         dx = target_x_m - robot_x_m
         dy = target_y_m - robot_y_m
         desired_heading = math.atan2(dy, dx)
         return desired_heading
     
     def normalize_angle(self, angle):
-        """Normalise angle en [-pi, pi]"""
+        """Normalises an angle to [-pi, pi]"""
         while angle > math.pi:
             angle -= 2 * math.pi
         while angle < -math.pi:
@@ -151,8 +151,8 @@ class RealRobotMappingAuto(Node):
         return angle
     
     def pid_heading_control(self, heading_error):
-        """Contrôle PID pour correction cap"""
-        # Normaliser erreur
+        """PID control for heading correction"""
+        # Normalise the error
         heading_error = self.normalize_angle(heading_error)
         
         # PID
@@ -160,41 +160,41 @@ class RealRobotMappingAuto(Node):
         d_term = self.return_kd * (heading_error - self.last_heading_error)
         angular_cmd = p_term + d_term
         
-        # Limiter
+        # Clamp
         angular_cmd = max(-0.3, min(0.3, angular_cmd))
         
         self.last_heading_error = heading_error
         return angular_cmd
     
     def distance_m(self, x1, y1, x2, y2):
-        """Distance euclidienne"""
+        """Euclidean distance"""
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     
     def control_loop(self):
-        """Boucle de contrôle principal"""
+        """Main control loop"""
         
-        if self.state == RobotState.AUTONOME:
-            # wall_centering_node gère seul - rien à faire ici
+        if self.state == RobotState.AUTONOMOUS:
+            # wall_centering_node handles it alone - nothing to do here
             return
         
         elif self.state == RobotState.RETURN_PLANNED:
-            # Attente que return_path_generator ait calculé le chemin
+            # Wait for return_path_generator to compute the path
             if len(self.return_path_m) > 0:
                 self.state = RobotState.RETURNING
                 self.return_path_idx = 0
                 self.last_heading_error = 0.0
-                self.get_logger().info("🔄 État → RETURNING (suivi chemin A*)")
+                self.get_logger().info("🔄 State → RETURNING (following the A* path)")
             return
         
         elif self.state == RobotState.RETURNING:
             pose = self.get_robot_pose_in_map()
             if pose is None:
-                self.get_logger().warn("⚠️ Pose TF indisponible")
+                self.get_logger().warn("⚠️ TF pose unavailable")
                 return
             
             robot_x_m, robot_y_m, robot_theta = pose
             
-            # Trouver le prochain waypoint en lookahead
+            # Find the next lookahead waypoint
             next_wp_idx = self.return_path_idx
             
             for i in range(self.return_path_idx, len(self.return_path_m)):
@@ -209,35 +209,35 @@ class RealRobotMappingAuto(Node):
             
             target_x, target_y = self.return_path_m[next_wp_idx]
             
-            # Distance au but final
+            # Distance to the final goal
             goal_x, goal_y = self.return_path_m[-1]
             dist_to_goal = self.distance_m(robot_x_m, robot_y_m, goal_x, goal_y)
             
-            # Vérifier si but atteint
+            # Check whether the goal is reached
             if dist_to_goal < self.return_goal_tolerance_m:
-                self.get_logger().info(f"✅ BUT ATTEINT! Distance: {dist_to_goal:.3f}m")
+                self.get_logger().info(f"✅ GOAL REACHED! Distance: {dist_to_goal:.3f}m")
                 self.complete_mission()
                 return
             
-            # Calculer cap désiré et l'erreur
+            # Compute the desired heading and the error
             desired_heading = self.compute_desired_heading(
                 robot_x_m, robot_y_m, target_x, target_y
             )
             heading_error = self.normalize_angle(desired_heading - robot_theta)
             
-            # Contrôle PID
+            # PID control
             angular_cmd = self.pid_heading_control(heading_error)
             
-            # Vitesse linéaire (constant pour maintenant)
+            # Linear speed (constant for now)
             linear_cmd = self.return_max_speed
             
-            # Publier commande
+            # Publish the command
             cmd = Twist()
             cmd.linear.x = linear_cmd
             cmd.angular.z = angular_cmd
             self.pub_cmd_vel.publish(cmd)
             
-            # Debug tous les 10 pas (0.5s à 20Hz)
+            # Debug every 10 steps (0.5s at 20Hz)
             if self.return_path_idx % 10 == 0:
                 self.get_logger().debug(
                     f"🧭 WP {next_wp_idx}/{len(self.return_path_m)} "
@@ -253,24 +253,24 @@ class RealRobotMappingAuto(Node):
             self.pub_cmd_vel.publish(cmd)
     
     def complete_mission(self):
-        """Marque fin de mission"""
+        """Marks the end of the mission"""
         self.state = RobotState.COMPLETED
-        self.get_logger().info("\n✅ MISSION COMPLÉTÉE!")
+        self.get_logger().info("\n✅ MISSION COMPLETE!")
         
-        # Stop moteurs
+        # Stop the motors
         cmd = Twist()
         self.pub_cmd_vel.publish(cmd)
         
-        # Publier signal
+        # Publish the signal
         msg = Bool()
         msg.data = True
         self.pub_state.publish(msg)
         
-        # Sauvegarder logs
+        # Save the logs
         self.save_mission_log()
     
     def save_mission_log(self):
-        """Sauvegarde les logs de la mission"""
+        """Saves the mission logs"""
         try:
             log_dir = Path.home() / "mapping_logs"
             log_dir.mkdir(exist_ok=True)
@@ -290,24 +290,24 @@ class RealRobotMappingAuto(Node):
             self.get_logger().info(f"💾 Log mission: {log_file}")
             
         except Exception as e:
-            self.get_logger().error(f"❌ Erreur log: {e}")
+            self.get_logger().error(f"❌ Log error: {e}")
 
 
 def main(args=None):
     """
-    Lance le nœud orchestrateur + les 3 nœuds subsidiaires
+    Starts the orchestrator node + the 3 helper nodes
     """
     import subprocess
     import time
     
-    # Récupérer répertoire courant
+    # Get the current directory
     pkg_path = Path(__file__).parent
     
     processes = []
     
     try:
-        # Lancer wall_centering_node (autonomie)
-        print("🚀 Lancement wall_centering_node...")
+        # Start wall_centering_node (autonomy)
+        print("🚀 Starting wall_centering_node...")
         p1 = subprocess.Popen(
             ['python3', str(pkg_path / 'wall_centering_node.py')],
             stdout=subprocess.DEVNULL,
@@ -316,8 +316,8 @@ def main(args=None):
         processes.append(p1)
         time.sleep(1)
         
-        # Lancer loop_closure_detector
-        print("🚀 Lancement loop_closure_detector...")
+        # Start loop_closure_detector
+        print("🚀 Starting loop_closure_detector...")
         p2 = subprocess.Popen(
             ['python3', str(pkg_path / 'loop_closure_detector.py')],
             stdout=subprocess.DEVNULL,
@@ -326,8 +326,8 @@ def main(args=None):
         processes.append(p2)
         time.sleep(0.5)
         
-        # Lancer trajectory_saver
-        print("🚀 Lancement trajectory_saver...")
+        # Start trajectory_saver
+        print("🚀 Starting trajectory_saver...")
         p3 = subprocess.Popen(
             ['python3', str(pkg_path / 'trajectory_saver.py')],
             stdout=subprocess.DEVNULL,
@@ -336,8 +336,8 @@ def main(args=None):
         processes.append(p3)
         time.sleep(0.5)
         
-        # Lancer return_path_generator
-        print("🚀 Lancement return_path_generator...")
+        # Start return_path_generator
+        print("🚀 Starting return_path_generator...")
         p4 = subprocess.Popen(
             ['python3', str(pkg_path / 'return_path_generator.py')],
             stdout=subprocess.DEVNULL,
@@ -346,17 +346,17 @@ def main(args=None):
         processes.append(p4)
         time.sleep(0.5)
         
-        print("✅ Tous les nœuds lancés, démarrage orchestrateur...\n")
+        print("✅ All nodes started, starting the orchestrator...\n")
         
-        # Lancer l'orchestrateur principal
+        # Start the main orchestrator
         rclpy.init(args=args)
         node = RealRobotMappingAuto()
         rclpy.spin(node)
         
     except KeyboardInterrupt:
-        print("\n⏹️  Arrêt détecté, fermeture...")
+        print("\n⏹️  Stop detected, shutting down...")
     finally:
-        # Terminer tous les processus enfants
+        # Terminate every child process
         for p in processes:
             try:
                 p.terminate()
@@ -370,7 +370,7 @@ def main(args=None):
         except Exception:
             pass
         
-        print("✅ Arrêt complet")
+        print("✅ Fully stopped")
 
 
 if __name__ == '__main__':

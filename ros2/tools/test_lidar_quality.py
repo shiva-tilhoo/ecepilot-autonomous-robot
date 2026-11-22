@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Vérifie la qualité des scans LIDAR en les superposant sur l'image du circuit
-Pour diagnostiquer si le problème vient du LIDAR ou de SLAM
+Checks the quality of the LIDAR scans by overlaying them on the track image
+To find out whether a problem comes from the LIDAR or from SLAM
 """
 import rclpy
 from rclpy.node import Node
@@ -35,24 +35,24 @@ class LidarQualityTest(Node):
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("LIDAR Quality Test - ESC to quit")
         
-        # Charger l'image circuit
+        # Load the track image
         try:
-            self.circuit_surf = pygame.image.load("image_corridor_grossi.png").convert()
+            self.circuit_surf = pygame.image.load("image_corridor_widened.png").convert()
             self.circuit_surf = pygame.transform.scale(self.circuit_surf, (WIDTH, HEIGHT))
         except:
             self.circuit_surf = pygame.Surface((WIDTH, HEIGHT))
             self.circuit_surf.fill((255, 255, 255))
         
-        self.get_logger().info('🔍 Test qualité LIDAR - Appuyez ESC pour quitter')
+        self.get_logger().info('🔍 LIDAR quality test - press ESC to quit')
         
     def odom_callback(self, msg):
-        # Convertir quaternion en angle
+        # Convert the quaternion to an angle
         qz = msg.pose.pose.orientation.z
         qw = msg.pose.pose.orientation.w
         theta = 2.0 * math.atan2(qz, qw)
         
         self.latest_pose = {
-            'x': msg.pose.pose.position.x / MAP_RES,  # Retour en pixels
+            'x': msg.pose.pose.position.x / MAP_RES,  # Back to pixels
             'y': msg.pose.pose.position.y / MAP_RES,
             'theta': theta
         }
@@ -65,11 +65,11 @@ class LidarQualityTest(Node):
         }
     
     def draw(self):
-        # Fond = image circuit
+        # Background = track image
         self.screen.blit(self.circuit_surf, (0, 0))
         
         if self.latest_scan and self.latest_pose:
-            # Robot (bleu)
+            # Robot (blue)
             rx = int(self.latest_pose['x'])
             ry = int(self.latest_pose['y'])
             pygame.draw.circle(self.screen, (0, 0, 255), (rx, ry), 10)
@@ -79,7 +79,7 @@ class LidarQualityTest(Node):
             front_y = int(ry + 15 * math.sin(self.latest_pose['theta']))
             pygame.draw.line(self.screen, (255, 0, 0), (rx, ry), (front_x, front_y), 3)
             
-            # Points LIDAR (rouge vif pour voir les erreurs)
+            # LIDAR points (bright red to make the errors visible)
             ranges = self.latest_scan['ranges']
             angle_min = self.latest_scan['angle_min']
             angle_inc = self.latest_scan['angle_increment']
@@ -88,21 +88,21 @@ class LidarQualityTest(Node):
                 if r < 0.15 or r > 3.0 or not math.isfinite(r):
                     continue
                 
-                # Angle du rayon dans le repère monde
+                # Ray angle in the world frame
                 ray_angle = angle_min + i * angle_inc + self.latest_pose['theta']
                 
-                # Position du point détecté
+                # Position of the detected point
                 px = int(rx + (r / MAP_RES) * math.cos(ray_angle))
                 py = int(ry + (r / MAP_RES) * math.sin(ray_angle))
                 
-                # Dessiner point (rouge = détection LIDAR)
+                # Draw the point (red = LIDAR detection)
                 if 0 <= px < WIDTH and 0 <= py < HEIGHT:
                     pygame.draw.circle(self.screen, (255, 0, 0), (px, py), 2)
             
             # Stats
             font = pygame.font.SysFont("monospace", 14)
             valid_ranges = [r for r in ranges if 0.15 < r < 3.0 and math.isfinite(r)]
-            text = font.render(f"Scans valides: {len(valid_ranges)}/{len(ranges)}", True, (255, 255, 0))
+            text = font.render(f"Valid scans: {len(valid_ranges)}/{len(ranges)}", True, (255, 255, 0))
             self.screen.blit(text, (10, 10))
         
         pygame.display.flip()

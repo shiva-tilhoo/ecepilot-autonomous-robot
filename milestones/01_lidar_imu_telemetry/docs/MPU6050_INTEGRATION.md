@@ -58,9 +58,9 @@ platformio run --target upload
 ```
 [SETUP] Initialisation ESP32 + LIDAR + MPU6050 + microROS
 [I2C] Initialisation...
-[MPU6050] Détecté et initialisé!
-[LIDAR] Serial2 initialisé
-[SETUP] ✓ Tous les composants initialisés!
+[MPU6050] Detected and initialised!
+[LIDAR] Serial2 initialised
+[SETUP] ✓ All components initialised!
 ```
 
 ### 2. Start ROS2 (4 Terminals)
@@ -197,7 +197,7 @@ ros2 topic echo /scan --max-count=1
 3. Check that the MPU6050 is detected:
    ```bash
    # On the ESP32, look at the Serial logs:
-   # [MPU6050] Détecté et initialisé!
+   # [MPU6050] Detected and initialised!
    ```
 4. Check the rate with `ros2 topic hz /imu/data`
 

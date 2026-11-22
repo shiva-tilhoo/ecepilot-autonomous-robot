@@ -261,32 +261,32 @@ ros2 topic echo /data
 
 ### 1. General Info
 ```
-🔍 SCAN LIDAR #1 reçu
+🔍 LIDAR SCAN #1 received
 Frame ID: lidar_link
-Nombre de points: 360
+Number of points: 360
 Angle Min/Max: 0.00 / 6.28 rad
 Range Min/Max: 0.06 / 12.00 m
 ```
 
 ### 2. Obstacle Detection
 ```
-⚠️  Obstacle le plus proche: 0.52 m @ indice 45 (angle: 45.0°)
+⚠️  Closest obstacle: 0.52 m @ index 45 (angle: 45.0°)
 ```
 
 ### 3. Danger Alert
 ```
-🚨 DANGER! Obstacle devant: 0.32 m @ 0.0° (trop proche!)
+🚨 DANGER! Obstacle ahead: 0.32 m @ 0.0° (too close!)
 ```
 
 ### 4. Statistics
 ```
-📈 Points valides: 360 / 360, Distance moyenne: 5.32 m
+📈 Valid points: 360 / 360, Mean distance: 5.32 m
 ```
 
 ### 5. Debug
 ```
-Point 0: distance=5.230 m, intensité=100.0
-Point 1: distance=5.150 m, intensité=120.0
+Point 0: distance=5.230 m, intensity=100.0
+Point 1: distance=5.150 m, intensity=120.0
 ...
 ```
 

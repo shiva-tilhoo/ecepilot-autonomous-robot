@@ -257,6 +257,6 @@ slam_settle_time = 0.5       # Minimum pause between moves
 
 ## 📍 FILES TO MODIFY:
 
-1. **naif_autonome.py** → Lines 82-95 (params)
-2. **algo_naif_v2.py** → Lines 82-97 (params + emergency)
+1. **naive_autonomous.py** → Lines 82-95 (params)
+2. **naive_mapper_v2.py** → Lines 82-97 (params + emergency)
 3. **config/slam_toolbox_params.yaml** → Line 18 (minimum_travel_heading)

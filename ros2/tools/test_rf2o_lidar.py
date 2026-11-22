@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test script pour vérifier que RF2O reçoit les données du LIDAR simulé"""
+"""Test script that checks whether RF2O receives the simulated LIDAR data"""
 
 import rclpy
 from rclpy.node import Node
@@ -21,17 +21,17 @@ class RFO2TestNode(Node):
         self.scan_count = 0
         self.odom_count = 0
         
-        # Écoute les trois topics clés
+        # Listen to the three key topics
         self.create_subscription(LaserScan, '/scan_raw', self.scan_raw_callback, qos)
         self.create_subscription(LaserScan, '/scan', self.scan_callback, qos)
         self.create_subscription(Odometry, '/odom', self.odom_callback, qos)
         
-        self.get_logger().info('🔍 Démarrage du test - En écoute sur /scan_raw, /scan et /odom')
+        self.get_logger().info('🔍 Starting the test - listening on /scan_raw, /scan and /odom')
 
     def scan_raw_callback(self, msg):
         self.scan_raw_count += 1
         if self.scan_raw_count % 30 == 0:
-            self.get_logger().info(f'✅ /scan_raw: {self.scan_raw_count} scans, {len(msg.ranges)} rayons')
+            self.get_logger().info(f'✅ /scan_raw: {self.scan_raw_count} scans, {len(msg.ranges)} rays')
 
     def scan_callback(self, msg):
         self.scan_count += 1

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Synchronise l'horloge du PC avec micro-ROS/ESP32
-Élimine les avertissements TF_OLD_DATA dans RViz
+Synchronises the PC clock with micro-ROS/ESP32
+Removes the TF_OLD_DATA warnings in RViz
 """
 
 import rclpy
@@ -12,17 +12,17 @@ import time
 class ClockSync(Node):
     def __init__(self):
         super().__init__('clock_sync')
-        self.get_logger().info("🕐 Synchronisation d'horloge en cours...")
+        self.get_logger().info("🕐 Clock synchronisation in progress...")
         
-        # Vérifie l'horloge système
+        # Check the system clock
         system_time = time.time()
-        self.get_logger().info(f"Horloge PC: {system_time}")
+        self.get_logger().info(f"PC clock: {system_time}")
         
-        # Obtient le timestamp du premier TF
+        # Get the timestamp of the first TF
         self.check_esp_clock()
         
     def check_esp_clock(self):
-        """Affiche l'horloge ESP32"""
+        """Displays the ESP32 clock"""
         try:
             result = subprocess.run(
                 "ros2 topic echo /tf --once 2>/dev/null | grep -A2 'stamp:' | head -5",
@@ -32,9 +32,9 @@ class ClockSync(Node):
                 timeout=5
             )
             
-            self.get_logger().info(f"\n📡 Horloge ESP32:\n{result.stdout}")
+            self.get_logger().info(f"\n📡 ESP32 clock:\n{result.stdout}")
             
-            # Parse le timestamp
+            # Parse the timestamp
             lines = result.stdout.split('\n')
             for i, line in enumerate(lines):
                 if 'sec:' in line:
@@ -43,16 +43,16 @@ class ClockSync(Node):
                         nanosec = int(lines[i+1].split(':')[1].strip())
                         esp_time = sec + nanosec / 1e9
                         
-                        self.get_logger().info(f"⏱️  Temps ESP32: {esp_time:.2f}s")
-                        self.get_logger().info(f"⏱️  Temps PC:   {time.time():.2f}s")
+                        self.get_logger().info(f"⏱️  ESP32 time: {esp_time:.2f}s")
+                        self.get_logger().info(f"⏱️  PC time:    {time.time():.2f}s")
                         
-                        # La synchronisation se fait automatiquement via ROS2 DDS
-                        self.get_logger().info("✅ Horloges synchronisées!")
-                        self.get_logger().info("💡 Redémarre RViz pour voir la map correctement")
+                        # Synchronisation happens automatically through ROS2 DDS
+                        self.get_logger().info("✅ Clocks synchronised!")
+                        self.get_logger().info("💡 Restart RViz to see the map correctly")
                         
                         return
         except Exception as e:
-            self.get_logger().error(f"Erreur: {e}")
+            self.get_logger().error(f"Error: {e}")
 
 def main():
     rclpy.init()

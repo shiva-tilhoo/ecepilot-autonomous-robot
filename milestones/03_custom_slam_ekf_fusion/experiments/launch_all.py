@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Launch file pour démarrer:
+Launch file that starts:
 1. Micro-ROS agent
-2. RViz avec la config LIDAR/IMU
-3. Nœud Kalman filter IMU
+2. RViz with the LIDAR/IMU config
+3. IMU Kalman filter node
 """
 
 import os

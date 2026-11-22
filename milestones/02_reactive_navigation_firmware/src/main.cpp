@@ -99,11 +99,11 @@ static HardwareSerial LIDAR_SERIAL(2);
 // Pre-allocated buffers (NO malloc in loop!)
 static float lidar_ranges[360];
 
-// Mode contrôle autonome (trajectoire naïve)
+// Autonomous control mode (naive trajectory)
 static volatile bool autonomous_mode = false;
-static volatile int autonomous_throttle = 100;  // Vitesse avant par défaut
+static volatile int autonomous_throttle = 100;  // Default forward speed
 
-// IMU avec Kalman simplifié
+// IMU with a simplified Kalman filter
 static uint32_t last_imu_read = 0;
 
 // Kalman simple
@@ -130,43 +130,43 @@ float kalman_update(KalmanFilter1D *kf, float z) {
 }
 
 // ============================================================
-// Algorithme de trajectoire NAÏF basé sur le LIDAR
-// Principe: Plus de points à gauche -> tourner à droite
-//           Plus de points à droite -> tourner à gauche
+// NAIVE trajectory algorithm based on the LIDAR
+// Principle: more points on the left -> turn right
+//            more points on the right -> turn left
 // ============================================================
 
 typedef struct {
-  int throttle;     // Vitesse avant/arrière (-255 à +255)
-  int steering;     // Direction (-255 à +255)
+  int throttle;     // Forward/backward speed (-255 to +255)
+  int steering;     // Direction (-255 to +255)
 } TrajectoryCommand;
 
 /**
- * Analyse la distribution des points du lidar et retourne
- * une commande de trajectoire naïve
+ * Analyses the distribution of the lidar points and returns
+ * a naive trajectory command
  * 
- * @param ranges: tableau des distances du lidar (360 points)
- * @param max_range: distance maximale considérée (cm)
- * @param forward_speed: vitesse avant souhaitée (0-255)
- * @return TrajectoryCommand avec throttle et steering
+ * @param ranges: array of lidar distances (360 points)
+ * @param max_range: maximum distance taken into account (cm)
+ * @param forward_speed: desired forward speed (0-255)
+ * @return TrajectoryCommand with throttle and steering
  */
 TrajectoryCommand naive_trajectory(float ranges[], float max_range, int forward_speed) {
   TrajectoryCommand cmd = {0, 0};
   
-  // Diviser le lidar en deux zones: gauche et droite
-  // Gauche: angles 90-270 (relatif au robot, +X vers l'avant)
-  // Droite: angles 270-360 et 0-90
+  // Split the lidar into two zones: left and right
+  // Left: angles 90-270 (relative to the robot, +X forward)
+  // Right: angles 270-360 and 0-90
   
-  int left_count = 0;   // Points détectés à gauche
-  int right_count = 0;  // Points détectés à droite
-  int valid_count = 0;  // Points valides (dans max_range)
+  int left_count = 0;   // Points detected on the left
+  int right_count = 0;  // Points detected on the right
+  int valid_count = 0;  // Valid points (within max_range)
   
-  // Compter les points dans chaque zone
+  // Count the points in each zone
   for(int i = 0; i < 360; i++) {
     if(ranges[i] > 0 && ranges[i] <= max_range) {
       valid_count++;
       
-      // Zone gauche: angles 45-315 (moitié gauche)
-      // Zone droite: angles 315-45 (moitié droite)
+      // Left zone: angles 45-315 (left half)
+      // Right zone: angles 315-45 (right half)
       if(i >= 45 && i < 315) {
         left_count++;
       } else {
@@ -175,25 +175,25 @@ TrajectoryCommand naive_trajectory(float ranges[], float max_range, int forward_
     }
   }
   
-  // Calculer le ratio de distribution
-  // Si balance proche de 0 -> zones équilibrées -> avancer tout droit
-  // Si balance > 0 -> plus à gauche -> tourner à droite
-  // Si balance < 0 -> plus à droite -> tourner à gauche
+  // Compute the distribution ratio
+  // If the balance is close to 0 -> balanced zones -> go straight
+  // If balance > 0 -> more on the left -> turn right
+  // If balance < 0 -> more on the right -> turn left
   
   int balance = left_count - right_count;
   
-  // Vitesse avant constante
+  // Constant forward speed
   cmd.throttle = forward_speed;
   
-  // Steering proportionnel au déséquilibre
-  // Maximum 255 quand il y a déséquilibre extrême
+  // Steering proportional to the imbalance
+  // Up to 255 for an extreme imbalance
   if(valid_count > 0) {
-    // Normaliser par le nombre total de points
+    // Normalise by the total number of points
     cmd.steering = (balance * 255) / (valid_count + 1);
-    // Limiter pour éviter variations brutales
+    // Clamp to avoid sudden changes
     cmd.steering = constrain(cmd.steering, -128, 128);
   } else {
-    // Pas de points -> tourner sur place lentement pour explorer
+    // No points -> turn slowly in place to explore
     cmd.throttle = 50;
     cmd.steering = 100;
   }
@@ -202,15 +202,15 @@ TrajectoryCommand naive_trajectory(float ranges[], float max_range, int forward_
 }
 
 /**
- * Version plus intelligente avec détection d'obstacles proches
+ * Smarter version with close-obstacle detection
  */
 TrajectoryCommand smart_trajectory(float ranges[], float max_range, int forward_speed, float danger_threshold) {
   TrajectoryCommand cmd = naive_trajectory(ranges, max_range, forward_speed);
   
-  // Vérifier la présence d'obstacles trop proches devant
+  // Check for obstacles that are too close ahead
   float min_front_dist = max_range;
   
-  // Devant: angles 330-30 (±30° de l'axe avant)
+  // Ahead: angles 330-30 (±30° around the forward axis)
   for(int i = 0; i < 30; i++) {
     if(ranges[i] > 0) min_front_dist = fmin(min_front_dist, ranges[i]);
   }
@@ -218,10 +218,10 @@ TrajectoryCommand smart_trajectory(float ranges[], float max_range, int forward_
     if(ranges[i] > 0) min_front_dist = fmin(min_front_dist, ranges[i]);
   }
   
-  // Si obstacle trop proche devant
+  // If an obstacle is too close ahead
   if(min_front_dist < danger_threshold) {
-    cmd.throttle = -100;   // Reculer
-    cmd.steering = -150;   // Tourner à gauche agressivement
+    cmd.throttle = -100;   // Reverse
+    cmd.steering = -150;   // Turn left aggressively
   }
   
   return cmd;
@@ -387,7 +387,7 @@ void imuTask(void *param) {
       int16_t ax, ay, az, gx, gy, gz;
       mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
       
-      // Debug: affiche les valeurs brutes toutes les 100 lectures
+      // Debug: print the raw values every 100 readings
       if(debug_count++ % 100 == 0) {
         Serial.printf("[IMU RAW] ax=%d ay=%d az=%d gx=%d gy=%d gz=%d\n", ax, ay, az, gx, gy, gz);
       }
@@ -508,23 +508,23 @@ void publishTask(void *param) {
 }
 
 /**
- * Tâche de contrôle de trajectoire autonome
- * Utilise les données du lidar pour guider le robot
+ * Autonomous trajectory control task
+ * Uses the lidar data to guide the robot
  */
 void autonomousTrajectoryTask(void *param) {
   Serial.println("[TRAJECTORY] Start");
   
-  // Paramètres de l'algorithme
-  const float MAX_RANGE = 40.0f;        // Distance max du lidar considérée (cm)
-  const float DANGER_THRESHOLD = 7.0f;  // Distance de sécurité (cm)
-  const int BASE_THROTTLE = 150;         // Vitesse avant de base (0-255)
+  // Algorithm parameters
+  const float MAX_RANGE = 40.0f;        // Max lidar distance taken into account (cm)
+  const float DANGER_THRESHOLD = 7.0f;  // Safety distance (cm)
+  const int BASE_THROTTLE = 150;         // Base forward speed (0-255)
   
   uint32_t loop_count = 0;
   uint32_t last_debug = 0;
   
-  // Inclure le fichier header pour accéder aux fonctions moteurs
-  // Les fonctions motors_init(), motor_left(), motor_right(), motors_drive()
-  // sont déclarées dans motors.h et implémentées dans motors.cpp
+  // Include the header file to access the motor functions
+  // The functions motors_init(), motor_left(), motor_right(), motors_drive()
+  // are declared in motors.h and implemented in motors.cpp
   
   while(1) {
     if(!autonomous_mode) {
@@ -532,21 +532,21 @@ void autonomousTrajectoryTask(void *param) {
       continue;
     }
     
-    // Récupérer les données du lidar (elles sont mises à jour par lidarTask)
+    // Fetch the lidar data (updated by lidarTask)
     uint8_t read_buf = lidar_read_buf.load();
     LidarScan *scan = &lidar_buffers[read_buf];
     
-    // Copier les données pour éviter les conditions de course
+    // Copy the data to avoid race conditions
     float local_ranges[360];
     for(int i = 0; i < 360; i++) {
       local_ranges[i] = scan->ranges[i];
     }
     
-    // Récupérer la commande de trajectoire intelligente
+    // Get the smart trajectory command
     TrajectoryCommand cmd = smart_trajectory(local_ranges, MAX_RANGE, BASE_THROTTLE, DANGER_THRESHOLD);
     
-    // Appliquer les commandes moteur
-    // motors_drive(throttle, steering) convertit les commandes en vitesses différentielles
+    // Apply the motor commands
+    // motors_drive(throttle, steering) converts the commands into differential speeds
     motors_drive(cmd.throttle, cmd.steering);
     
     // Debug periodique
@@ -554,7 +554,7 @@ void autonomousTrajectoryTask(void *param) {
     if(now - last_debug >= 1000) {
       loop_count = 0;
       
-      // Compter les points valides pour diagnostique
+      // Count the valid points for diagnostics
       int valid_points = 0;
       int left_points = 0;
       int right_points = 0;
@@ -576,7 +576,7 @@ void autonomousTrajectoryTask(void *param) {
       last_debug = now;
     }
     
-    // Fréquence de mise à jour: 20Hz
+    // Update rate: 20Hz
     vTaskDelay(pdMS_TO_TICKS(50));
     loop_count++;
   }
@@ -589,7 +589,7 @@ void setup() {
   
   LIDAR_SERIAL.begin(LIDAR_BAUD, SERIAL_8N1, LIDAR_RX, -1);
   
-  // Initialiser les moteurs
+  // Initialise the motors
   motors_init();
   
   xTaskCreatePinnedToCore(lidarTask, "LIDAR", 5120, NULL, 4, NULL, 1);

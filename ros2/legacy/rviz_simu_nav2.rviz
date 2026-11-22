@@ -1,5 +1,5 @@
 # rviz_simu_nav2.rviz
-# Configuration RViz pour visualiser la simulation, les tf, la map et la localisation
+# RViz configuration to view the simulation, the TF, the map and the localisation
 
 Fixed Frame: map
 
@@ -13,17 +13,17 @@ Displays:
 - Pose (/odom, /base_link)
 
 # Instructions :
-# 1. Lance RViz avec : rviz2 -d rviz_simu_nav2.rviz
-# 2. Ajoute les topics :
+# 1. Start RViz with: rviz2 -d rviz_simu_nav2.rviz
+# 2. Add the topics:
 #    - /scan (LaserScan, frame: laser_link)
 #    - /odom (Odometry, frame: base_link)
 #    - /map (OccupancyGrid, frame: map)
-#    - TF (pour visualiser tous les frames)
+#    - TF (to see every frame)
 #    - RobotModel (base_link)
-# 3. Vérifie que le tf odom->base_link bouge avec le robot
-# 4. Vérifie que la pose /odom correspond à la position réelle du robot
-# 5. Vérifie que la map s'étend et ne drift pas
+# 3. Check that the odom->base_link TF moves with the robot
+# 4. Check that the /odom pose matches the actual position of the robot
+# 5. Check that the map grows and does not drift
 
 # Astuce :
-# Utilise "ViewFrames" (ros2 run tf2_tools view_frames) pour générer un pdf des tf
-# Utilise "ros2 topic echo /odom" pour comparer la pose avec la simulation
+# Use "ViewFrames" (ros2 run tf2_tools view_frames) to generate a PDF of the TF tree
+# Use "ros2 topic echo /odom" to compare the pose with the simulation

@@ -7,9 +7,9 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     """
-    Launch file pour agent micro_ros + Foxglove Studio pour ESP32 LIDAR REEL
-    Affiche tous les 360 points du LIDAR en temps reel dans Foxglove
-    Inclut le modele 3D de la voiture
+    Launch file for the micro_ros agent + Foxglove Studio with the REAL ESP32 LIDAR
+    Shows all 360 LIDAR points live in Foxglove
+    Includes the 3D model of the car
     """
     
     # Get vehicle description package directory
@@ -18,9 +18,9 @@ def generate_launch_description():
         vehicle_description_dir, 'launch', 'vehicle_broadcaster.launch.py'
     )
     
-    # Delai avant de lancer Foxglove (laisser le temps aux topics de se creer)
+    # Delay before starting Foxglove (gives the topics time to appear)
     foxglove_delayed = TimerAction(
-        period=3.0,  # 3 secondes de delai
+        period=3.0,  # 3-second delay
         actions=[
             ExecuteProcess(
                 cmd=['foxglove-studio'],
@@ -31,16 +31,16 @@ def generate_launch_description():
     
     return LaunchDescription([
         LogInfo(msg="\n" + "="*70),
-        LogInfo(msg="[LAUNCH] ESP32 LIDAR - Configuration Micro ROS Agent + VOITURE 3D (Foxglove)"),
+        LogInfo(msg="[LAUNCH] ESP32 LIDAR - Micro ROS Agent setup + 3D CAR (Foxglove)"),
         LogInfo(msg="="*70 + "\n"),
         
-        # ==================== VEHICLE DESCRIPTION (modele 3D de la voiture) ====================
+        # ==================== VEHICLE DESCRIPTION (3D model of the car) ====================
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(vehicle_launch),
             launch_arguments={}.items(),
         ),
         
-        # ==================== TF BROADCASTER (publie la frame lidar_link) ====================
+        # ==================== TF BROADCASTER (publishes the lidar_link frame) ====================
         Node(
             package='cpp_pubsub',
             executable='tf_broadcaster',
@@ -48,18 +48,18 @@ def generate_launch_description():
             output='screen',
         ),
         
-        # ==================== BUFFER LIDAR (accumule les scans) ====================
+        # ==================== LIDAR BUFFER (accumulates the scans) ====================
         Node(
             package='cpp_pubsub',
             executable='lidar_buffer',
             name='lidar_buffer',
             output='screen',
             parameters=[
-                {'buffer_size': 20},  # Garde 20 scans (plus rapide a effacer)
+                {'buffer_size': 20},  # Keeps 20 scans (clears faster)
             ],
         ),
         
-        # ==================== LISTENER (recoit et log les donnees) ====================
+        # ==================== LISTENER (receives and logs the data) ====================
         Node(
             package='cpp_pubsub',
             executable='listener',
@@ -67,34 +67,34 @@ def generate_launch_description():
             output='screen',
         ),
         
-        # ==================== FOXGLOVE VISUALIZER (avec delai) ====================
+        # ==================== FOXGLOVE VISUALIZER (delayed) ====================
         foxglove_delayed,
         
-        LogInfo(msg="\n[OK] Listener demarré - Foxglove Studio se lancera dans 3 secondes\n"),
-        LogInfo(msg="[CONFIG] CONFIGURATION REQUISE:"),
-        LogInfo(msg="   Lancez l'agent micro_ros dans un AUTRE terminal:"),
+        LogInfo(msg="\n[OK] Listener started - Foxglove Studio will start in 3 seconds\n"),
+        LogInfo(msg="[CONFIG] REQUIRED SETUP:"),
+        LogInfo(msg="   Start the micro_ros agent in ANOTHER terminal:"),
         LogInfo(msg="   "),
         LogInfo(msg="   docker run -it --rm microros/micro-ros-docker:humble \\"),
         LogInfo(msg="     ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888"),
         LogInfo(msg="   "),
-        LogInfo(msg="[TOPICS] TOPICS RECUS DE L'ESP32:"),
-        LogInfo(msg="   - /scan (sensor_msgs/LaserScan) - 360 points LIDAR"),
-        LogInfo(msg="   - /data (std_msgs/Int32) - Compteur"),
-        LogInfo(msg="   - /scan_cloud (sensor_msgs/PointCloud2) - Points 3D"),
+        LogInfo(msg="[TOPICS] TOPICS RECEIVED FROM THE ESP32:"),
+        LogInfo(msg="   - /scan (sensor_msgs/LaserScan) - 360 LIDAR points"),
+        LogInfo(msg="   - /data (std_msgs/Int32) - Counter"),
+        LogInfo(msg="   - /scan_cloud (sensor_msgs/PointCloud2) - 3D points"),
         LogInfo(msg=""),
-        LogInfo(msg="[VISUAL] VISUALISATION FOXGLOVE (3D):"),
-        LogInfo(msg="   - Interface web moderne et intuitive"),
-        LogInfo(msg="   - Modele 3D de la voiture au centre"),
-        LogInfo(msg="   - Points LIDAR affichés en temps reel"),
-        LogInfo(msg="   - Panneau gauche pour selectionner les topics a afficher"),
-        LogInfo(msg="   - Affichage du compteur /data"),
+        LogInfo(msg="[VISUAL] FOXGLOVE VISUALISATION (3D):"),
+        LogInfo(msg="   - Modern, intuitive web interface"),
+        LogInfo(msg="   - 3D model of the car in the centre"),
+        LogInfo(msg="   - LIDAR points displayed live"),
+        LogInfo(msg="   - Left panel to select the topics to display"),
+        LogInfo(msg="   - Display of the /data counter"),
         LogInfo(msg=""),
         LogInfo(msg="[TIPS] FOXGLOVE STUDIO:"),
-        LogInfo(msg="   1. Cliquez sur 'Add panel' (haut droit)"),
-        LogInfo(msg="   2. Selectionnez '3D' pour la vue 3D"),
-        LogInfo(msg="   3. Selectionnez '/scan_cloud' dans la liste des topics"),
-        LogInfo(msg="   4. Utilisez le panneau 'Telemetry' pour voir les valeurs"),
-        LogInfo(msg="   5. Naviguez avec la souris: scroll=zoom, click-droit=rotation"),
-        LogInfo(msg="   6. Utilisez 'Time scrubbing' pour rejouer l'historique"),
+        LogInfo(msg="   1. Click 'Add panel' (top right)"),
+        LogInfo(msg="   2. Select '3D' for the 3D view"),
+        LogInfo(msg="   3. Select '/scan_cloud' in the topic list"),
+        LogInfo(msg="   4. Use the 'Telemetry' panel to see the values"),
+        LogInfo(msg="   5. Navigate with the mouse: scroll=zoom, right-click=rotate"),
+        LogInfo(msg="   6. Use 'Time scrubbing' to replay the history"),
         LogInfo(msg="\n" + "="*70 + "\n"),
     ])

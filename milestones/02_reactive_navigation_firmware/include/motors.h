@@ -1,5 +1,5 @@
 // ============================================================
-// Contrôle moteurs - Version simplifiée
+// Motor control - Simplified version
 // ============================================================
 
 #ifndef MOTORS_H
@@ -7,19 +7,19 @@
 
 #include <Arduino.h>
 
-// Initialisation des moteurs
+// Initialise the motors
 void motors_init();
 
-// Contrôle moteur gauche: speed = -255 à +255
+// Left motor control: speed = -255 to +255
 void motor_left(int speed);
 
-// Contrôle moteur droit: speed = -255 à +255
+// Right motor control: speed = -255 to +255
 void motor_right(int speed);
 
-// Arrêt complet
+// Full stop
 void motors_stop();
 
-// Contrôle type voiture RC: throttle (-255 à +255), steering (-255 à +255)
+// RC-car style control: throttle (-255 to +255), steering (-255 to +255)
 void motors_drive(int throttle, int steering);
 
 #endif // MOTORS_H

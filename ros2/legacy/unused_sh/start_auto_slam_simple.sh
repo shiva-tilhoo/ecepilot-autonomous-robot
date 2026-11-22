@@ -1,5 +1,5 @@
 #!/bin/bash
-# Robot autonome + SLAM + retour SIMPLE (A* + PID), sans Nav2
+# Autonomous robot + SLAM + SIMPLE return (A* + PID), without Nav2
 
 set -e
 
@@ -16,7 +16,7 @@ if [ -f "$WORKSPACE_ROOT/install/setup.bash" ]; then
 fi
 
 if ! ros2 pkg prefix slam_toolbox >/dev/null 2>&1; then
-  echo "❌ Package slam_toolbox introuvable"
+  echo "❌ slam_toolbox package not found"
   exit 1
 fi
 
@@ -27,11 +27,11 @@ sleep 2
 
 echo ""
 echo "==========================================="
-echo "🤖 ROBOT AUTONOME + SLAM + RETOUR SIMPLE"
+echo "🤖 AUTONOMOUS ROBOT + SLAM + SIMPLE RETURN"
 echo "==========================================="
 echo ""
 
-echo "1️⃣  Simulator (autonome + mode simple intégré)..."
+echo "1️⃣  Simulator (autonomous + built-in simple mode)..."
 python3 simu_lidar_auto.py &
 sleep 1
 
@@ -39,11 +39,11 @@ echo "2️⃣  Bridge (/scan + /odom_ground_truth)..."
 python3 simu_bridge.py &
 sleep 1
 
-echo "3️⃣  TF statique base_link -> laser_link..."
+echo "3️⃣  Static TF base_link -> laser_link..."
 ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 1 base_link laser_link &
 sleep 0.5
 
-echo "4️⃣  TF dynamique odom -> base_link..."
+echo "4️⃣  Dynamic TF odom -> base_link..."
 python3 odom_to_tf.py &
 sleep 1
 
@@ -67,10 +67,10 @@ echo "==========================================="
 echo "✅ READY (SLAM + SIMPLE RETURN)"
 echo "==========================================="
 echo ""
-echo "ℹ️ Fonctionnement:"
+echo "ℹ️ How it works:"
 echo "   - Mapping autonome"
 echo "   - Freeze SLAM"
-echo "   - Retour A* + PID (sans Nav2)"
+echo "   - A* + PID return (without Nav2)"
 echo ""
 echo "📊 Monitoring:"
 echo "   ros2 topic hz /scan"

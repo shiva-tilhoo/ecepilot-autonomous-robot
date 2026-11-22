@@ -2,32 +2,32 @@
 #define CONFIG_H
 
 // ============================================================
-// Configuration globale
+// Global configuration
 // ============================================================
 
-// Activation/Désactivation des systèmes
+// Enable/disable the subsystems
 #define ENABLE_MOTORS 0
 #define ENABLE_LIDAR 1
 #define ENABLE_IMU 1
 
 // ============================================================
-// Configuration moteurs
+// Motor configuration
 // ============================================================
 
 #if ENABLE_MOTORS
 
-// Moteur A (gauche)
+// Motor A (left)
 #define MOTOR_LEFT_DIR1 21    // GPIO21 - AIN1
 #define MOTOR_LEFT_DIR2 17    // GPIO17 - AIN2
 #define MOTOR_LEFT_PWM 25     // GPIO25 - PWMA
 
-// Moteur B (droit)
+// Motor B (right)
 #define MOTOR_RIGHT_DIR1 22   // GPIO22 - BIN1
 #define MOTOR_RIGHT_DIR2 23   // GPIO23 - BIN2
 #define MOTOR_RIGHT_PWM 26    // GPIO26 - PWMB
 
 // PWM configuration
-#define PWM_FREQ 100000       // 100 kHz (comme Waveshare)
+#define PWM_FREQ 100000       // 100 kHz (as in the Waveshare code)
 #define PWM_RESOLUTION 8      // 8-bit (0-255)
 #define PWM_CHANNEL_LEFT 0
 #define PWM_CHANNEL_RIGHT 1

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Algorithme NAIF pour améliorer le mapping avec rotations sans odométrie.
+NAIVE algorithm to improve mapping during rotations without odometry.
 
-Le principe: on détecte les rotations via le LIDAR lui-même.
-- On sauvegarde une "signature" du scan (angles des pics de murs)
-- On tourne jusqu'à retrouver cette signature rotée
+The principle: rotations are detected with the LIDAR itself.
+- A "signature" of the scan is saved (angles of the wall peaks)
+- The robot turns until it finds that signature again, rotated
 """
 
 import rclpy
@@ -18,8 +18,8 @@ import time
 
 def extract_peaks(ranges, angle_increment, angle_min, threshold=0.5):
     """
-    Extrait les positions angulaires des murs (pics de faible distance).
-    Retourne une liste d'angles en radians où on détecte des murs.
+    Extracts the angular positions of the walls (short-distance peaks).
+    Returns a list of angles in radians where walls are detected.
     """
     peaks = []
     for i, r in enumerate(ranges):
@@ -30,7 +30,7 @@ def extract_peaks(ranges, angle_increment, angle_min, threshold=0.5):
 
 
 def normalize_angle(angle):
-    """Ramène un angle dans [-pi, pi]"""
+    """Wraps an angle into [-pi, pi]"""
     while angle > math.pi:
         angle -= 2 * math.pi
     while angle < -math.pi:
@@ -39,19 +39,19 @@ def normalize_angle(angle):
 
 
 def angle_diff(angle1, angle2):
-    """Différence d'angle normalisée"""
+    """Normalised angle difference"""
     diff = normalize_angle(angle1 - angle2)
     return diff
 
 
 def estimate_rotation_from_scans(scan_old, scan_new, max_rotation=math.pi/2):
     """
-    ALGO NAIF: Compare deux scans pour estimer la rotation.
+    NAIVE ALGO: compares two scans to estimate the rotation.
     
-    Stratégie:
-    1) Extraire les pics de murs dans chaque scan
-    2) Chercher le décalage angulaire qui aligne les pics
-    3) Cet angle = la rotation effectuée
+    Strategy:
+    1) Extract the wall peaks in each scan
+    2) Find the angular offset that aligns the peaks
+    3) That angle = the rotation performed
     """
     peaks_old = extract_peaks(
         scan_old.ranges, 
@@ -65,27 +65,27 @@ def estimate_rotation_from_scans(scan_old, scan_new, max_rotation=math.pi/2):
     )
     
     if len(peaks_old) < 3 or len(peaks_new) < 3:
-        return None  # Pas assez de features
+        return None  # Not enough features
     
-    # Convertir en numpy pour croiser les angles
+    # Convert to numpy to match the angles
     peaks_old_arr = np.array(peaks_old)
     peaks_new_arr = np.array(peaks_new)
     
-    # Essayer différents décalages et voir lequel minimise l'erreur
+    # Try several offsets and keep the one that minimises the error
     best_rotation = 0.0
     best_error = float('inf')
     
-    # Tester des rotations de -45° à +45° par pas de 2°
+    # Test rotations from -45° to +45° in 2° steps
     for rot_deg in np.linspace(-45, 45, 45):
         rot = math.radians(rot_deg)
         
-        # Appliquer la rotation hypothétique aux anciens pics
+        # Apply the candidate rotation to the old peaks
         rotated_old = peaks_old_arr + rot
         
-        # Calculer la distance minimale pour chaque pic ancien vers les nouveaux
+        # Minimum distance from each old peak to the new ones
         errors = []
         for angle_old in rotated_old:
-            # Trouver le pic nouveau le plus proche
+            # Find the closest new peak
             min_dist = min([abs(angle_diff(angle_old, angle_new)) 
                            for angle_new in peaks_new_arr])
             errors.append(min_dist)
@@ -96,8 +96,8 @@ def estimate_rotation_from_scans(scan_old, scan_new, max_rotation=math.pi/2):
             best_error = avg_error
             best_rotation = rot
     
-    # Retourner la rotation seulement si confiance suffisante
-    if best_error < math.radians(10):  # Erreur < 10°
+    # Return the rotation only when the confidence is high enough
+    if best_error < math.radians(10):  # Error < 10°
         return best_rotation
     
     return None
@@ -105,18 +105,18 @@ def estimate_rotation_from_scans(scan_old, scan_new, max_rotation=math.pi/2):
 
 class NaiveRotationEstimator:
     """
-    Classe pour tracker les rotations du robot via LIDAR scanning.
+    Class that tracks the robot rotations through LIDAR scanning.
     """
     
     def __init__(self):
         self.last_scan = None
-        self.estimated_heading = 0.0  # En radians
+        self.estimated_heading = 0.0  # In radians
         self.confidence = 0.0
         
     def update(self, scan):
         """
-        Traite un nouveau scan et estime la rotation.
-        Retourne l'angle de rotation estimé (radians).
+        Processes a new scan and estimates the rotation.
+        Returns the estimated rotation angle (radians).
         """
         if self.last_scan is None:
             self.last_scan = scan
@@ -130,17 +130,17 @@ class NaiveRotationEstimator:
             self.last_scan = scan
             return rotation
         else:
-            # Perte de suivi, confiance baisse
+            # Tracking lost, confidence drops
             self.confidence *= 0.95
             return 0.0
 
 
 def rotate_until_target(node, cmd_vel_pub, estimator, target_rotation_deg, tolerance_deg=5):
     """
-    Algorithme NAIF pour effectuer une rotation.
+    NAIVE algorithm to perform a rotation.
     
-    Au lieu de tourner "pendant X secondes", on tourne jusqu'à ce que
-    le LIDAR détecte qu'on a tourné l'angle cible.
+    Instead of turning "for X seconds", the robot turns until
+    the LIDAR detects that the target angle has been reached.
     """
     target_rad = math.radians(target_rotation_deg)
     tolerance_rad = math.radians(tolerance_deg)
@@ -148,7 +148,7 @@ def rotate_until_target(node, cmd_vel_pub, estimator, target_rotation_deg, toler
     start_heading = estimator.estimated_heading
     target_heading = normalize_angle(start_heading + target_rad)
     
-    print(f"🔄 Rotation naïve: cible {target_rotation_deg}°")
+    print(f"🔄 Naive rotation: target {target_rotation_deg}°")
     
     twist = Twist()
     twist.linear.x = 0.0
@@ -160,17 +160,17 @@ def rotate_until_target(node, cmd_vel_pub, estimator, target_rotation_deg, toler
     while rclpy.ok() and (time.time() - start_time) < max_time:
         rclpy.spin_once(node, timeout_sec=0.05)
         
-        # Vérifier si on a atteint la cible
+        # Check whether the target is reached
         current_diff = normalize_angle(estimator.estimated_heading - target_heading)
         
         if abs(current_diff) < tolerance_rad:
-            print(f"✓ Rotation atteinte! Heading: {math.degrees(estimator.estimated_heading):.1f}°")
+            print(f"✓ Rotation reached! Heading: {math.degrees(estimator.estimated_heading):.1f}°")
             break
         
         cmd_vel_pub.publish(twist)
         time.sleep(0.05)
     
-    # Arrêter
+    # Stop
     twist.linear.x = 0.0
     twist.angular.z = 0.0
     cmd_vel_pub.publish(twist)
@@ -178,7 +178,7 @@ def rotate_until_target(node, cmd_vel_pub, estimator, target_rotation_deg, toler
 
 def main():
     rclpy.init()
-    node = rclpy.create_node('naif_rotation_mapper')
+    node = rclpy.create_node('naive_rotation_mapper')
     
     cmd_vel_pub = node.create_publisher(Twist, '/cmd_vel', 10)
     
@@ -188,8 +188,8 @@ def main():
         rot = estimator.update(scan)
         if rot is not None:
             heading_deg = math.degrees(estimator.estimated_heading)
-            print(f"  Rotation détectée: {math.degrees(rot):+.1f}° | "
-                  f"Heading: {heading_deg:.1f}° | Confiance: {estimator.confidence:.1%}")
+            print(f"  Rotation detected: {math.degrees(rot):+.1f}° | "
+                  f"Heading: {heading_deg:.1f}° | Confidence: {estimator.confidence:.1%}")
     
     node.create_subscription(LaserScan, '/scan', scan_cb, qos_profile_sensor_data)
     
@@ -197,19 +197,19 @@ def main():
     ╔════════════════════════════════════════╗
     │   NAÏVE LIDAR-BASED ROTATION MAPPER   │
     ╠════════════════════════════════════════╣
-    │  Les rotations sont trackées via LIDAR │
-    │  au lieu de l'odométrie.              │
+    │  Rotations are tracked with the LIDAR  │
+    │  instead of the odometry.             │
     ╚════════════════════════════════════════╝
     """)
     
     try:
-        # Laisser le LIDAR se calibrer
+        # Let the LIDAR settle
         print("Calibration LIDAR...")
         for _ in range(20):
             rclpy.spin_once(node, timeout_sec=0.1)
             time.sleep(0.05)
         
-        # TEST: Effectuer une rotation de 90°
+        # TEST: perform a 90° rotation
         print("\n→ Rotation test 1: +90°")
         rotate_until_target(node, cmd_vel_pub, estimator, 90.0)
         time.sleep(1)
@@ -218,13 +218,13 @@ def main():
         rotate_until_target(node, cmd_vel_pub, estimator, -180.0)
         time.sleep(1)
         
-        print("\n→ Rotation test 3: +90° (retour)")
+        print("\n→ Rotation test 3: +90° (back)")
         rotate_until_target(node, cmd_vel_pub, estimator, 90.0)
         
-        print("\n✓ Tests terminés")
+        print("\n✓ Tests finished")
         
     except KeyboardInterrupt:
-        print("\nArrêt...")
+        print("\nStopping...")
         twist = Twist()
         cmd_vel_pub.publish(twist)
     

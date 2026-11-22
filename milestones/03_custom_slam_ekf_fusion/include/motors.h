@@ -2,7 +2,7 @@
 #define MOTORS_H
 
 // ============================================================
-// Contrôle moteurs - Interface
+// Motor control - Interface
 // ============================================================
 
 #include <Arduino.h>
@@ -10,26 +10,26 @@
 
 #if ENABLE_MOTORS
 
-// Initialisation des pins et PWM
+// Initialise the pins and the PWM
 void motors_init();
 
-// Contrôle moteur gauche (-255 à +255)
+// Left motor control (-255 to +255)
 void motor_left(int speed);
 
-// Contrôle moteur droit (-255 à +255)
+// Right motor control (-255 to +255)
 void motor_right(int speed);
 
-// Arrêt des deux moteurs
+// Stop both motors
 void motors_stop();
 
-// Contrôle différentiel (throttle + steering)
-// throttle: -255 (arrière) à +255 (avant)
-// steering: -255 (gauche) à +255 (droite)
+// Differential control (throttle + steering)
+// throttle: -255 (backward) to +255 (forward)
+// steering: -255 (left) to +255 (right)
 void motors_drive(int throttle, int steering);
 
 #else
 
-// Stubs vides si moteurs désactivés
+// Empty stubs when the motors are disabled
 inline void motors_init() {}
 inline void motor_left(int) {}
 inline void motor_right(int) {}

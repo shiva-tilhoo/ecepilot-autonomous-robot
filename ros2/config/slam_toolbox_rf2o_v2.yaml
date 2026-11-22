@@ -2,7 +2,7 @@ slam_toolbox:
   ros__parameters:
     # --- SOLVER ---
     solver_plugin: solver_plugins::CeresSolver
-    max_iterations: 20             # Un peu plus pour bien fermer la boucle
+    max_iterations: 20             # A bit more to close the loop properly
     huber_scale: 0.001
     
     # --- FRAMES ---
@@ -15,27 +15,27 @@ slam_toolbox:
     # --- ANTI-RESET ---
     do_loop_closing: false         
     
-    # --- PRÉCISION ---
+    # --- ACCURACY ---
     use_scan_matching: true
-    # Puisque RF2O est précis, on peut baisser ces pénalités
+    # Since RF2O is accurate, these penalties can be lowered
     angle_variance_penalty: 0.5    
     distance_variance_penalty: 0.5 
     
-    # Recherche dense pour recaler les derniers centimètres
+    # Dense search to realign the last few centimetres
     coarse_search_angle_offset: 0.8
     coarse_angle_resolution: 0.01  
     correlation_search_space_dimension: 1.5
 
-    # --- DYNAMIQUE (Fréquence élevée pour RF2O) ---
+    # --- DYNAMICS (high rate for RF2O) ---
     minimum_time_interval: 0.05     
     minimum_travel_distance: 0.05   
     minimum_travel_heading: 0.02    
 
-    # --- NETTETÉ ---
+    # --- SHARPNESS ---
     resolution: 0.03               
     map_update_interval: 1.0       
 
-    # --- SYNCHRO ---
-    transform_timeout: 0.5         # On laisse un peu plus de temps pour la synchro TF
+    # --- SYNC ---
+    transform_timeout: 0.5         # Give a bit more time for the TF sync
     tf_buffer_duration: 10.0
     scan_buffer_size: 15

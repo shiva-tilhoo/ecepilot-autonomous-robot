@@ -86,7 +86,7 @@ You should see:
 
 - [README.md](README.md) - Full overview
 - [../ros2_ece_ws/QUICKSTART.md](../ros2_ece_ws/QUICKSTART.md) - ROS2 workflow
-- [../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md](../ros2_ece_ws/GUIDE_LIDAR_360_COMPLET.md) - Technical details
+- [../ros2_ece_ws/LIDAR_360_GUIDE.md](../ros2_ece_ws/LIDAR_360_GUIDE.md) - Technical details
 
 ## 🐛 Problems?
 

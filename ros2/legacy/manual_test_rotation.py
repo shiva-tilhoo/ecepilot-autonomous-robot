@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple manual test: tu contrôles le robot avec:
+Simple manual test: drive the robot with:
 W = forward
 A = rotate left  
 D = rotate right
@@ -8,11 +8,11 @@ S = backward
 SPACE = stop
 Q = quit
 
-Observe dans RViz:
-- La carte (costmap) devrait rester FIXE
-- Le robot devrait bouger en avant/arrière/rotation
-- SI la carte TOURNE avec le robot → YAW DIVERGENCE (mapping broken)
-- SI la carte reste immobile → MAPPING WORKING!
+Watch in RViz:
+- The map (costmap) should stay FIXED
+- The robot should move forward/backward/rotate
+- IF the map ROTATES with the robot → YAW DIVERGENCE (mapping broken)
+- IF the map stays still → MAPPING WORKING!
 """
 
 import rclpy

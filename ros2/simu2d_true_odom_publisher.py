@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Publie la vraie position du robot simulé sur /odom (Odometry)
-Récupère robot_pos et robot_theta via socket, publie à 30Hz
+Publishes the true position of the simulated robot on /odom (Odometry)
+Reads robot_pos and robot_theta through a socket, publishes at 30Hz
 """
 import rclpy
 from rclpy.node import Node
@@ -37,11 +37,11 @@ class SimuOdomPublisher(Node):
         self.last_pose = (0.0, 0.0, 0.0)
 
     def publish_odom(self):
-        MAP_RESOLUTION = 0.02  # 2 cm/pixel, à adapter si besoin
+        MAP_RESOLUTION = 0.02  # 2 cm/pixel, adjust if needed
         WIDTH = 800
         HEIGHT = 600
-        # Origine map.yaml (par défaut [0.0, 0.0, 0.0])
-        # Pour avoir l'origine au centre, décaler :
+        # map.yaml origin (default [0.0, 0.0, 0.0])
+        # To put the origin in the centre, shift:
         x_origin = WIDTH / 2
         y_origin = HEIGHT / 2
         try:
@@ -51,12 +51,12 @@ class SimuOdomPublisher(Node):
         except Exception:
             robot_pos, robot_theta = self.last_pose[:2], self.last_pose[2]
 
-        # Conversion pixels -> mètres avec origine au centre
+        # Pixels -> metres conversion with the origin in the centre
         x_m = (robot_pos[0] - x_origin) * MAP_RESOLUTION
         y_m = (robot_pos[1] - y_origin) * MAP_RESOLUTION
 
         now = self.get_clock().now()
-        # Publication /odom et TF désactivée pour éviter conflit avec rf2o_laser_odometry
+        # /odom and TF publishing disabled to avoid a conflict with rf2o_laser_odometry
         pass
 
 

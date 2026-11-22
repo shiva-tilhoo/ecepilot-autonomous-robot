@@ -1,7 +1,7 @@
 # lidar_socket.py
 """
-Socket server pour transmettre les scans du lidar simulé
-Usage : importer et envoyer les ranges (distances) à chaque cycle
+Socket server that streams the scans of the simulated lidar
+Usage: import it and send the ranges (distances) at every cycle
 """
 import socket
 import pickle
@@ -29,7 +29,7 @@ class LidarSocketServer:
         self.conn.close()
         self.sock.close()
 
-# Exemple d'utilisation :
+# Example:
 # server = LidarSocketServer()
 # server.send_scan([1.0, 2.0, ...])
 # server.close()

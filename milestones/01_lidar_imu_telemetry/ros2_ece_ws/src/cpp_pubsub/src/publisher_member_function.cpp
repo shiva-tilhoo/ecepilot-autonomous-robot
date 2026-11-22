@@ -17,16 +17,16 @@ public:
   MinimalPublisher()
   : Node("lidar_publisher"), count_(0)
   {
-    // Subscriber pour LaserScan (LIDAR de l'ESP32)
+    // Subscriber for LaserScan (ESP32 LIDAR)
     lidar_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "/scan", 10, std::bind(&MinimalPublisher::lidar_callback, this, std::placeholders::_1));
     
-    // Subscriber pour Int32 (compteur)
+    // Subscriber for Int32 (counter)
     counter_subscription_ = this->create_subscription<std_msgs::msg::Int32>(
       "/data", 10, std::bind(&MinimalPublisher::counter_callback, this, std::placeholders::_1));
     
-    RCLCPP_INFO(this->get_logger(), "📊 Listeners démarrés - Topics:");
-    RCLCPP_INFO(this->get_logger(), "   - /scan (LaserScan depuis ESP32 LIDAR)");
+    RCLCPP_INFO(this->get_logger(), "📊 Listeners started - Topics:");
+    RCLCPP_INFO(this->get_logger(), "   - /scan (LaserScan from the ESP32 LIDAR)");
     RCLCPP_INFO(this->get_logger(), "   - /data (Counter)");
   }
 private:
@@ -37,7 +37,7 @@ private:
   
   void lidar_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
   {
-    // Compter les points avec détection
+    // Count the points with a detection
     int points_detected = 0;
     float min_range = 999.0f;
     float max_range = 0.0f;
@@ -57,7 +57,7 @@ private:
       avg_range /= points_detected;
     }
     
-    // Afficher les statistiques
+    // Print the statistics
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2);
     oss << "LIDAR Data: " << points_detected << "/" << msg->ranges.size() << " points valid"
@@ -68,7 +68,7 @@ private:
     
     RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
     
-    // Log les 10 premiers points avec détection pour debug
+    // Log the first 10 detected points for debugging
     if(points_detected > 0) {
       std::ostringstream points_str;
       points_str << std::fixed << std::setprecision(3);

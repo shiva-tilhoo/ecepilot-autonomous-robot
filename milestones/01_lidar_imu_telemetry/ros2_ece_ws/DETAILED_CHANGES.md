@@ -178,7 +178,7 @@ ExecuteProcess(
     # ❌ Called through a shell script
 )
 
-LogInfo(msg="✅ Listener démarré + RViz en approche...")
+LogInfo(msg="✅ Listener started + RViz coming up...")
 # ❌ Little information
 ```
 
@@ -195,16 +195,16 @@ ExecuteProcess(
 )
 
 # ✅ Complete built-in guide
-LogInfo(msg="🎨 VISUALISATION RVIZ (3D):"),
-LogInfo(msg="   Les points LIDAR apparaissent en rouge"),
-LogInfo(msg="   Grille XY pour orientation spatiale"),
+LogInfo(msg="🎨 RVIZ VISUALISATION (3D):"),
+LogInfo(msg="   The LIDAR points show up in red"),
+LogInfo(msg="   XY grid for spatial orientation"),
 LogInfo(msg="   Frame: lidar_link"),
 LogInfo(msg=""),
-LogInfo(msg="💡 ASTUCES RVIZ:"),
-LogInfo(msg="   • Utilisez le panneau 'Displays' pour activer/désactiver LaserScan"),
-LogInfo(msg="   • Scroller pour zoomer, click-droit pour tourner la vue"),
-LogInfo(msg="   • Augmentez 'Decay Time' pour voir l'historique"),
-LogInfo(msg="   • Changez la couleur via 'Color Transformer'"),
+LogInfo(msg="💡 RVIZ TIPS:"),
+LogInfo(msg="   • Use the 'Displays' panel to enable/disable LaserScan"),
+LogInfo(msg="   • Scroll to zoom, right-click to rotate the view"),
+LogInfo(msg="   • Increase 'Decay Time' to see the history"),
+LogInfo(msg="   • Change the colour with 'Color Transformer'"),
 ```
 
 **Description:**
@@ -226,7 +226,7 @@ Displays all 360 LIDAR points in real time
 
 | Param | BEFORE | AFTER |
 |-------|--------|-------|
-| Name | "LaserScan" | "LaserScan (Tous les 360 points)" |
+| Name | "LaserScan" | "LaserScan 360" |
 | Style | Flat Squares | **Spheres** |
 | Color | Intensity-based | **Flat Color - Red** |
 | Color Transformer | Intensity | **Flat Color** |
@@ -245,7 +245,7 @@ Frame Rate: 30           # ✅ Tuned
 **XY grid:**
 ```yaml
 Alpha: 0.3  # ✅ Less intrusive (was 0.5)
-Name: "Grid XY (Référence)"
+Name: "Grid XY (Reference)"
 ```
 
 **3D view:**
@@ -272,10 +272,10 @@ View Type: XYOrbit
 
 **Steps displayed:**
 ```bash
-📦 [1/3] Compilation ROS2...
-💾 [2/3] Vérification du code ESP32...
-⚙️  [3/3] Vérification des fichiers de configuration...
-✅ Système LIDAR 360° prêt au lancement!
+📦 [1/3] Building ROS2...
+💾 [2/3] Checking the ESP32 code...
+⚙️  [3/3] Checking the configuration files...
+✅ LIDAR 360° system ready to launch!
 ```
 
 ---

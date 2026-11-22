@@ -80,17 +80,17 @@ If the points have another colour → see the RViz guide.
 
 ## 📁 Documentation Files
 
-1. **RESUME_MODIFICATIONS.md** (📊 Technical overview)
+1. **CHANGES_SUMMARY.md** (📊 Technical overview)
    - What changed
    - Before/after comparison
    - Technical details
 
-2. **GUIDE_LIDAR_360_COMPLET.md** (📖 Full guide)
+2. **LIDAR_360_GUIDE.md** (📖 Full guide)
    - Complete procedure
    - Detailed configuration
    - Advanced troubleshooting
 
-3. **GUIDE_RVIZ_CONFIGURATION.md** (🎨 RViz only)
+3. **RVIZ_CONFIGURATION_GUIDE.md** (🎨 RViz only)
    - Manual adjustments
    - Use cases
    - RViz troubleshooting
@@ -113,9 +113,9 @@ grep "LIDAR_BUFFER_SIZE 720" \
 # Should print: #define LIDAR_BUFFER_SIZE 720
 
 # 2. RViz config OK?
-grep "LaserScan (Tous les 360 points)" \
+grep "LaserScan 360" \
   milestones/01_lidar_imu_telemetry/ros2_ece_ws/src/cpp_pubsub/launch/lidar.rviz
-# Should print: - LaserScan (Tous les 360 points)
+# Should print: Name: LaserScan 360
 
 # 3. Listener OK?
 grep "lidar_callback" \
@@ -131,7 +131,7 @@ grep "lidar_callback" \
 ```bash
 # Check that everything is built:
 milestones/01_lidar_imu_telemetry/ros2_ece_ws/deploy_lidar.sh
-# Should print: ✅ Système LIDAR 360° prêt au lancement!
+# Should print: ✅ LIDAR 360° system ready to launch!
 ```
 
 ### RViz shows an error
@@ -147,7 +147,7 @@ docker ps | grep micro-ros
 # Should list the running container
 ```
 
-See the "Troubleshooting" section of **GUIDE_LIDAR_360_COMPLET.md** for more.
+See the "Troubleshooting" section of **LIDAR_360_GUIDE.md** for more.
 
 ---
 
@@ -185,9 +185,9 @@ ESP32 LIDAR (LD06)
 
 Once it works:
 
-1. **Understand the buffer** → see RESUME_MODIFICATIONS.md
-2. **Adjust RViz** → see GUIDE_RVIZ_CONFIGURATION.md
-3. **Advanced** → see the "Next steps" section of GUIDE_LIDAR_360_COMPLET.md
+1. **Understand the buffer** → see CHANGES_SUMMARY.md
+2. **Adjust RViz** → see RVIZ_CONFIGURATION_GUIDE.md
+3. **Advanced** → see the "Next steps" section of LIDAR_360_GUIDE.md
 
 ---
 

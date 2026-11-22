@@ -1,22 +1,22 @@
 #!/bin/bash
-# Script pour ajouter automatiquement le LaserScan à RViz via l'IPC locale
+# Adds the LaserScan display to RViz automatically through local IPC
 
-# Attendre que RViz soit prêt
+# Wait until RViz is ready
 sleep 3
 
-# Publier des commandes RViz via le service de configuration
-# (Cette méthode utilise l'API de scripting RViz)
+# Send RViz commands through the configuration service
+# (this method uses the RViz scripting API)
 
 python3 << 'EOF'
 import subprocess
 import time
 
-# Attendre un peu avant de configurer
+# Wait a little before configuring
 time.sleep(2)
 
-print("[RViz Setup] Tentative d'ajout du LaserScan...")
+print("[RViz Setup] Trying to add the LaserScan display...")
 
-# Créer un fichier de commandes RViz pour ajouter le display
+# Create an RViz command file that adds the display
 rviz_config_commands = """
 - Class: rviz_common/LaserScan
   Decay Time: 0.2
@@ -50,11 +50,11 @@ rviz_config_commands = """
   Value: true
 """
 
-print("[RViz Setup] LaserScan devrait être visible dans RViz")
-print("[RViz Setup] Si ce n'est pas le cas, fais manuellement :")
-print("[RViz Setup] 1. Dans RViz, clique sur 'Add' en bas à gauche")
-print("[RViz Setup] 2. Sélectionne 'LaserScan' dans la liste")
-print("[RViz Setup] 3. Dans le champ 'Topic', saisis '/scan'")
-print("[RViz Setup] 4. Clique OK")
+print("[RViz Setup] The LaserScan should now be visible in RViz")
+print("[RViz Setup] If it is not, add it by hand:")
+print("[RViz Setup] 1. In RViz, click 'Add' at the bottom left")
+print("[RViz Setup] 2. Select 'LaserScan' in the list")
+print("[RViz Setup] 3. In the 'Topic' field, type '/scan'")
+print("[RViz Setup] 4. Click OK")
 
 EOF

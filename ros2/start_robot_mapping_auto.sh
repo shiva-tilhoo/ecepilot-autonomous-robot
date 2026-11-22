@@ -55,8 +55,8 @@ echo "=============================================="
 pkill -f "slam_toolbox|scan_restamper|static_transform_publisher|motor_odom_simple" 2>/dev/null || true
 sleep 1
 
-# [1] TF statique base_link -> laser_link
-# Ajuste x/y/z/roll/pitch/YAW selon la position physique réelle du lidar sur le robot
+# [1] Static TF base_link -> laser_link
+# Adjust x/y/z/roll/pitch/YAW to the actual physical position of the lidar on the robot
 echo "[1/6] Static TF: base_link -> laser_link"
 ros2 run tf2_ros static_transform_publisher \
     0.10 0.0 0.15 \
@@ -71,14 +71,14 @@ python3 scan_restamper_simple.py --ros-args &
 RESTAMPER_PID=$!
 sleep 1
 
-# [3] Attente topics
+# [3] Wait for the topics
 echo "[3/6] Waiting for /scan_raw..."
 python3 wait_for_topic.py /scan_raw 15 || { echo "❌ /scan_raw timeout"; exit 1; }
 echo "      Waiting for /scan..."
 python3 wait_for_topic.py /scan 15    || { echo "❌ /scan timeout"; exit 1; }
 
-# [4] Odom init-only : publie TF odom->base_link identité + /odom avec covariance énorme
-#     SLAM Toolbox recevra un prior "je ne sais rien" et fera 100% scan matching
+# [4] Init-only odom: publishes an identity odom->base_link TF + /odom with a huge covariance
+#     SLAM Toolbox gets an "I know nothing" prior and does 100% scan matching
 echo "[4/6] Odom init (static identity, covariance=1e6)"
 python3 motor_odom_simple.py --ros-args &
 MOTOR_ODOM_PID=$!
@@ -94,13 +94,13 @@ SLAM_PID=$!
 
 sleep 4
 
-echo "[6/6] Lancement de wall_centering_node.py"
+echo "[6/6] Starting wall_centering_node.py"
 python3 wall_centering_node.py --ros-args &
 
 
 echo ""
 echo "✅ Stack started"
 echo "   TF chain: map -> odom -> base_link -> laser_link"
-echo "   Odom = identité fixe, SLAM = scan matching pur"
+echo "   Odom = fixed identity, SLAM = pure scan matching"
 echo "🛑 Stop: Ctrl+C"
 wait

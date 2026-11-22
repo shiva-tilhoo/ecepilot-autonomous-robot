@@ -213,7 +213,7 @@ Key topics:
 
 1. **See [ARCHITECTURE.md](../../docs/ARCHITECTURE.md)** - Complete system architecture
 2. **See [SLAM_IMPLEMENTATION.md](../../docs/SLAM_IMPLEMENTATION.md)** - Detailed SLAM algorithm
-3. **See [PERFORMANCES.md](../../docs/PERFORMANCES.md)** - Comparison before/after the optimisations
+3. **See [PERFORMANCE.md](../../docs/PERFORMANCE.md)** - Comparison before/after the optimisations
 4. **Configure Nav2** - For autonomous (not manual) navigation
 5. **Add loop closure** - For large maps without drift
 

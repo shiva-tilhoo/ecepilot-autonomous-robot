@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script pour arrêter le robot après la sortie d'un node.
-Publie STOP sur /cmd_vel (Twist).
+Script that stops the robot after a node exits.
+Publishes STOP on /cmd_vel (Twist).
 """
 import rclpy
 from geometry_msgs.msg import Twist

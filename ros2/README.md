@@ -29,7 +29,7 @@ Python nodes, launchers and configurations that run on the PC (ROS 2 Humble). Th
 | `simu_lidar_auto.py` | pygame simulator: simulated robot and LiDAR, autonomous mode, return to start (recorded path, A\*, Nav2) |
 | `simu_bridge.py` | Bridge between the simulator and the ROS 2 topics (`/scan`, ground-truth odometry) |
 | `simu2d_*.py` | First version of the simulator, connected to ROS 2 through a socket |
-| `image_corridor_grossi.png` | Track used by the simulator (prepared with `track_images/`) |
+| `image_corridor_widened.png` | Track used by the simulator (prepared with `track_images/`) |
 
 ## Sub-folders
 

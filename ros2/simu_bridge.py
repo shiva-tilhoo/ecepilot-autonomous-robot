@@ -24,29 +24,29 @@ class SimuBridge(Node):
         try:
             self.sock.connect(('127.0.0.1', 5005))
             self.sock.setblocking(False)
-            self.get_logger().info('✅ Bridge connecté -> /scan')
+            self.get_logger().info('✅ Bridge connected -> /scan')
         except Exception as e:
-            self.get_logger().error(f"Erreur connexion : {e}")
+            self.get_logger().error(f"Connection error: {e}")
         
         # Throttle scans to reduce SLAM Message Filter overload
         self.scan_count = 0
         self.scan_throttle = 2  # Publish 1 scan every 2 scans (50% reduction)
         
-        # Flag pour geler les scans (arrêt SLAM et fige la carte)
+        # Flag to freeze the scans (stops SLAM and freezes the map)
         self.scan_frozen = False
         self.create_service(Empty, 'freeze_scan', self.handle_freeze_scan)
         
-        # Utilise un Timer ROS au lieu de spin_once
+        # Uses a ROS timer instead of spin_once
         self.create_timer(0.01, self.update)
 
     def handle_freeze_scan(self, request, response):
-        """Service handler pour geler les scans (arrêt SLAM mapping)"""
+        """Service handler that freezes the scans (stops SLAM mapping)"""
         self.scan_frozen = True
-        self.get_logger().info("🔒 Scans FIGÉS - SLAM mapping arrêté, carte gelée")
+        self.get_logger().info("🔒 Scans FROZEN - SLAM mapping stopped, map frozen")
         return response
 
     def update(self):
-        """Timer callback pour lire les données du simulateur"""
+        """Timer callback that reads the simulator data"""
         try:
             chunk = self.sock.recv(65536)
             if not chunk: return
@@ -59,7 +59,7 @@ class SimuBridge(Node):
                 
                 now = self.get_clock().now().to_msg()
                 
-                # Publier le scan LaserScan (sauf si figé)
+                # Publish the LaserScan (unless frozen)
                 if not self.scan_frozen:
                     scan = LaserScan()
                     scan.header.stamp = now
@@ -71,9 +71,9 @@ class SimuBridge(Node):
                     scan.angle_max = scan.angle_min + (num_rays - 1) * scan.angle_increment
                     scan.time_increment = 0.0
                     scan.range_min = 0.15
-                    scan.range_max = 1.0  # Réduit à 1.0m pour minimiser le bruit blanc SLAM
+                    scan.range_max = 1.0  # Reduced to 1.0m to minimise the white noise in SLAM
                     
-                    # Garder les rayons dans l'ordre - le simulateur les envoie déjà bien
+                    # Keep the rays in order - the simulator already sends them correctly
                     scan.ranges = [float(r) for r in data['ranges']]
                     scan.intensities = []
                     
@@ -82,7 +82,7 @@ class SimuBridge(Node):
                     if self.scan_count % self.scan_throttle == 0:
                         self.scan_pub.publish(scan)
                 
-                # Publier l'odométrie de vérité terrain (ground truth)
+                # Publish the ground-truth odometry
                 if 'pose' in data:
                     pose_data = data['pose']
                     odom_msg = Odometry()
